@@ -1,95 +1,205 @@
 #!/bin/bash
+# Creates a directory in the current directory and performs the setup required for development of NexToo
+
+CURRENT_STAGE3="20131010"
+MIRROR="http://gentoo.closest.myvwan.com/gentoo"
+
+# Internals
+ARCH=amd64
+
+BOLD="\e[1m"
+RED="\e[31m"
+GREEN="\e[32m"
+RESET="\e[0m"
+YELLOW="\e[33m"
+
+
+# Control params
+DEBUG=false
+FORCE=false
+SCRIPTS_DIR="${DIR}"
+TARGET_DIR=
+
 set -e
 
-# This script creates a folder in the current directory and performs the setup required for development of NexToo
+function debug() {
+	[[ "${DEBUG}" == 'true' ]] && echo -e "${RESET}$(date +%H:%m:%S) ${BOLD}${YELLOW}${*}${RESET}"
+}
 
-if [[ $EUID -ne 0 ]]; then
-  echo "You must be a root user to run this script!" 2>&1
-  exit 1
-fi
+function finish() {
+	[[ "$?" -ne '0' ]] && error "Unsuccessful completion, you may need to clean up now..."
+}
 
-# Execute getopt
-ARGS=`getopt -o "d:" -l "directory:" -n "setup_nextoo_env" -- "$@"`
- 
-target_dir=""
-script_source_dir="$(pwd)"
+function error() {
+	echo -e "${RESET}$(date +%H:%m:%S) ${RED}${BOLD}${*}${RESET}" >&2
+}
 
-#Bad arguments
-if [ $? -ne 0 ];
-then
-  exit 1
-fi
- 
-# A little magic
-eval set -- "$ARGS"
- 
-# Now go through all the options
-while true;
-do
+function run() {
+	debug "exec \"$*\""
+	$*
+}
+
+
+function status() {
+	echo -e "${RESET}$(date +%H:%m:%S) ${BOLD}${*}${RESET}"
+}
+
+function usage() {
+	echo -e "${RESET}${GREEN}${BOLD}NexToo Environment Setup Script${RESET} ${BOLD}version <TAG ME>${RESET}"
+	cat <<-EOU
+		Usage:	$(basename "${0}") [long option(s)] [option(s)] ...
+
+		Options:
+		    -d, --debug		Enable debugging output
+		    -f, --force		Use the directory specified by -d even if it exists already
+		    -h, --help		Show this message and exit
+		    -t, --target	Path to directory environment should be created in
+
+		An (empty) directory must always be specified. If not empty, the -f option must be
+		present and may lead to unpredictable results.
+
+		Any trailing parameters are passed to chroot for running inside the environment after
+		creation. If not provided, a bash shell will be spawned.
+
+	EOU
+}
+
+
+# Get command-line options
+args=$(getopt --shell=bash --options="dfht:" --longoptions="debug,force,help,target:" --name="$(basename \"${0}\")" -- "$@")
+if [[ "$?" -ne '0' ]]; then	error 'Terminating'; exit 1; fi
+eval set -- "${args}"
+
+while true; do
 	case "$1" in
-		-d|--directory)
-			
-		if [ -n "$2" ]
-			then
-			echo "Using $2..."
-			target_dir=$2
-		fi
-		shift 2;;
- 
-	--)
-		shift
-		break;;
-  esac
+		-d | --debug)
+			DEBUG=true
+			shift
+			;;
+
+		-f | --force)
+			FORCE=true
+			shift
+			;;
+
+		-h | --help)
+			usage
+			exit 0
+			;;
+
+		-t | --target)
+			TARGET_DIR="${2}"
+			shift 2
+			;;
+
+		--)
+			shift;
+			break;
+			;;
+
+		*)
+			usage
+			exit 1
+			;;
+	esac
 done
 
+
+
+
+
+
+
+
+
+
+# Check for rootness
+debug "Checking for root permissions..."
+if [[ $EUID -ne 0 ]]; then
+	error "You must be root to run this script"
+	exit 1
+fi
+
+# Get directory containing scripts
+debug "Getting source directory..."
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+SOURCE_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+debug "SOURCE_DIR='${SOURCE_DIR}'"
+
+
+
+
+
+
+
+
+
+
+
+
 # Create a directory for development
-if [ -z "$target_dir" ] 
-then
-	echo 'Must provide target directory to create and use for development environment'
-	echo 'Use -d or --directory'
-	echo 'Example: "setup_nextoo_env -d /tmp/nextooTesting"'
+if [[ -z "${TARGET_DIR}" ]]; then
+	usage
+	error 'Error: Target directory not specified.'
 	exit 1
 fi
 
-if [ -d "$target_dir" ]
-then
-	echo "$target_dir already exists. Remove it and try again."
-	exit 1
+if [[ -d "${TARGET_DIR}" ]]; then
+	if [[ "${FORCE}" != 'true' ]]; then
+		error "Error: Directory '${TARGET_DIR}' exists, and -f not specified. Remove and try again."
+		exit 1
+	fi
 fi
 
-echo "Making $2..."
-mkdir "$target_dir"
 
-echo "Changing directory to $2..."
-cd "$target_dir"
 
-echo 'Downloading the latest Gentoo Stage 3...'
-wget http://gentoo.closest.myvwan.com/gentoo/releases/amd64/current-stage3/stage3-amd64-20131010.tar.bz2
+# Real work
+trap finish EXIT
 
-echo 'Unpackaging Gentoo Stage 3...'
-tar -xpf stage3-amd64-20131010.tar.bz2
+if [[ ! -d "${TARGET_DIR}" ]]; then
+	status "Creating directory '${TARGET_DIR}'..."
+	run mkdir -p "${TARGET_DIR}"
+fi
 
-echo 'Downloading the latest Portage tree...'
-wget http://gentoo.closest.myvwan.com/gentoo/snapshots/portage-latest.tar.bz2
+status "Changing working directory to '${TARGET_DIR}'..."
+OLD_PWD=$(pwd)
+run cd "${TARGET_DIR}"
 
-echo 'Unpackaging Portage...'
-tar -xf portage-latest.tar.bz2 -C usr/
+status 'Downloading the latest Gentoo Stage 3 tarball...'
+run wget -nv "${MIRROR}/releases/${ARCH}/current-stage3/stage3-${ARCH}-${CURRENT_STAGE3}.tar.bz2"
 
-echo 'Mounting proc...'
-mount -t proc none proc/
+status 'Downloading the latest Portage tree...'
+run wget "${MIRROR}/snapshots/portage-latest.tar.bz2"
 
-echo 'Mounting dev...'
-mount --rbind /dev dev/
+status 'Unpacking Gentoo Stage 3 tarball...'
+run tar -xpf stage3-${ARCH}-${CURRENT_STAGE3}.tar.bz2
 
-echo 'Mounting sys...'
-mount --rbind /sys sys/
+status 'Unpacking Portage tree...'
+run tar -xf portage-latest.tar.bz2 -C usr/
 
-echo 'Copying /etc/resolve.conf...'
-cp /etc/resolv.conf etc/
+status 'Mounting filesystems...'
+run mount -t proc none proc/
+run mount --rbind /dev dev/
+run mount --rbind /sys sys/
 
-echo 'Copying nextoo_init script...'
-cp "$script_source_dir/nextoo_init.sh" root/
+status 'Copying /etc/resolve.conf...'
+run cp /etc/resolv.conf etc/
+
+status 'Copying nextoo_init script...'
+run cp "${SOURCE_DIR}/nextoo_init.sh" "${TARGET_DIR}/root/"
 
 #copy script into the env to run more commands, like env-update and source
-chroot . /bin/bash -i /root/nextoo_init.sh
+status 'Chrooting...'
+run env -i TERM="${TERM}" HOME=/root chroot . /bin/bash -i /root/nextoo_init.sh
+
+status "Changing working directory back to '${OLD_PWD}'..."
+run cd "${OLD_PWD}"
+
+status 'Cleaning up and tearing down...'
+run "${SOURCE_DIR}/teardown.sh" "${TARGET_DIR}"
 
