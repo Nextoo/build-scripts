@@ -12,7 +12,7 @@ set -e
 DEBUG=false
 
 function debug() {
-	[[ "${DEBUG}" == 'true' ]] && echo -e "${RESET}$(date +%H:%m:%S) ${BOLD}${YELLOW}${*}${RESET}"
+	[[ "${DEBUG}" == 'true' ]] && echo -e "${RESET}$(date +%H:%M:%S) ${BOLD}${YELLOW}${*}${RESET}"
 }
 
 function finish() {
@@ -20,7 +20,7 @@ function finish() {
 }
 
 function error() {
-	echo -e "${RESET}$(date +%H:%m:%S) ${RED}${BOLD}${*}${RESET}" >&2
+	echo -e "${RESET}$(date +%H:%M:%S) ${RED}${BOLD}${*}${RESET}" >&2
 }
 
 function run() {
@@ -29,7 +29,7 @@ function run() {
 }
 
 function status() {
-	echo -e "${RESET}$(date +%H:%m:%S) ${BOLD}${*}${RESET}"
+	echo -e "${RESET}$(date +%H:%M:%S) ${BOLD}${*}${RESET}"
 }
 
 function ensure_root() {
@@ -38,5 +38,3 @@ function ensure_root() {
 		exit 1
 	fi
 }
-
-trap finish EXIT

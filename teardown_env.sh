@@ -92,5 +92,3 @@ for x in $mounts; do
 done
 
 status "Teardown complete"
-
-trap - EXIT

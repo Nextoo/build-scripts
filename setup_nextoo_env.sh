@@ -20,6 +20,7 @@ done
 SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
 
 source "${SCRIPT_DIR}/utils.sh"
+trap finish EXIT
 
 
 function usage() {
@@ -142,7 +143,7 @@ run mount --rbind /dev dev/
 run mount --rbind /sys sys/
 
 status 'Chrooting...'
-run env -i TERM="${TERM}" HOME=/root chroot . /bin/bash -i /root/nextoo_scripts/chroot_bootstrap.sh
+run env -i TERM="${TERM}" HOME=/root chroot . /bin/bash --init-file /root/nextoo_scripts/chroot_bootstrap.sh -i
 
 status "Changing working directory back to '${OLD_PWD}'..."
 run cd "${OLD_PWD}"
