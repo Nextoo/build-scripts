@@ -6,7 +6,7 @@ MIRROR="http://gentoo.closest.myvwan.com/gentoo"
 
 # Internals
 ARCH=amd64
-
+SCRIPTS="chroot_bootstrap.sh utils.sh"
 
 set -e
 
@@ -127,21 +127,22 @@ run tar -xpf stage3-${ARCH}-${CURRENT_STAGE3}.tar.bz2
 status 'Unpacking Portage tree...'
 run tar -xf portage-latest.tar.bz2 -C usr/
 
+status 'Copying /etc/resolve.conf...'
+run cp /etc/resolv.conf etc/
+
+status 'Copying scripts...'
+run mkdir -p "${TARGET_DIR}/root/nextoo_scripts"
+for script in $SCRIPTS; do
+	run cp -a "${SCRIPT_DIR}/${script}" "${TARGET_DIR}/root/nextoo_scripts/"
+done
+
 status 'Mounting filesystems...'
 run mount -t proc none proc/
 run mount --rbind /dev dev/
 run mount --rbind /sys sys/
 
-status 'Copying /etc/resolve.conf...'
-run cp /etc/resolv.conf etc/
-
-status 'Copying scripts...'
-run cp "${SCRIPT_DIR}/utils.sh" "${TARGET_DIR}/root/"
-run cp "${SCRIPT_DIR}/nextoo_init.sh" "${TARGET_DIR}/root/"
-
-#copy script into the env to run more commands, like env-update and source
 status 'Chrooting...'
-run env -i TERM="${TERM}" HOME=/root chroot . /bin/bash -i /root/nextoo_init.sh
+run env -i TERM="${TERM}" HOME=/root chroot . /bin/bash -i /root/nextoo_scripts/chroot_bootstrap.sh
 
 status "Changing working directory back to '${OLD_PWD}'..."
 run cd "${OLD_PWD}"
@@ -153,6 +154,4 @@ else
 	run "${SCRIPT_DIR}/teardown_env.sh" --target="${TARGET_DIR}"
 fi
 
-debug "Post teardown"
-
-exit 0
+status "Finished!"
