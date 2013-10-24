@@ -3,6 +3,9 @@
 
 CURRENT_STAGE3="20131010"
 MIRROR="http://gentoo.closest.myvwan.com/gentoo"
+ 
+# Internals
+ARCH=amd64
 
 if [ -x utils.sh ]; then
 	. utils.sh
