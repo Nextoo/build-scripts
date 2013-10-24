@@ -22,5 +22,31 @@ source /etc/profile
 export PROMPT_COMMAND="export RETVAL=\${?}"
 export PS1="\[$(tput bold)\]\[$(tput setaf 6)\][NexToo] \[$(tput setaf 1)\]\u@\h \[$(tput setaf 4)\]\w \[$(tput setaf 3)\]\${RETVAL} \[$(tput setaf 7)\][\j] \[$(tput setaf 4)\]\\$\[$(tput sgr0)\] "
 
+
+
+
+# Configure the environment for NexToo
+status "Merging 'layman'..."
+emerge --noreplace --quiet layman
+
+status "Configuring layman..."
+egrep 'http://www.nextoo.org/layman/repositories.xml$' /etc/layman/layman.cfg >/dev/null
+[[ $? -eq '0' ]] || sed -i 's/^overlays  : http:\/\/www.gentoo.org\/proj\/en\/overlays\/repositories.xml$/overlays  : http:\/\/www.gentoo.org\/proj\/en\/overlays\/repositories.xml\n\thttp:\/\/www.nextoo.org\/layman\/repositories.xml/' /etc/layman/layman.cfg
+
+status "Syncing layman..."
+layman -S
+
+status "Adding NexToo overlay..."
+layman --add nextoo
+
+
+
+
+
+
+
+
+
+
 cd "${HOME}"
 set +e
