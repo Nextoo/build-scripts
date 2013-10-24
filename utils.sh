@@ -7,14 +7,9 @@ GREEN="\e[32m"
 RESET="\e[0m"
 YELLOW="\e[33m"
 
-
-# Control params
-DEBUG=false
-FORCE=false
-SCRIPTS_DIR="${DIR}"
-TARGET_DIR=
-
 set -e
+
+DEBUG=false
 
 function debug() {
 	[[ "${DEBUG}" == 'true' ]] && echo -e "${RESET}$(date +%H:%m:%S) ${BOLD}${YELLOW}${*}${RESET}"
@@ -33,7 +28,15 @@ function run() {
 	$*
 }
 
-
 function status() {
 	echo -e "${RESET}$(date +%H:%m:%S) ${BOLD}${*}${RESET}"
 }
+
+function ensure_root() {
+	if [[ $EUID -ne 0 ]]; then
+		error "You must be root to run this script"
+		exit 1
+	fi
+}
+
+trap finish EXIT

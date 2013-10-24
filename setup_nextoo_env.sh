@@ -7,15 +7,20 @@ MIRROR="http://gentoo.closest.myvwan.com/gentoo"
 # Internals
 ARCH=amd64
 
-if [ -x utils.sh ]; then
-	. utils.sh
-else
-	BOLD="\e[1m"
-	RED="\e[31m"
-	RESET="\e[0m"
-	echo echo -e "${RESET}$(date +%H:%m:%S) ${RED}${BOLD}'utils.sh' does not exist or is not executable!${RESET}" >&2
-	exit 1
-fi
+
+set -e
+
+# Get directory containing scripts
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+	SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+	SOURCE="$(readlink "$SOURCE")"
+	[[ $SOURCE != /* ]] && SOURCE="$SCRIPT_DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+
+source "${SCRIPT_DIR}/utils.sh"
+
 
 function usage() {
 	echo -e "${RESET}${GREEN}${BOLD}NexToo Environment Setup Script${RESET} ${BOLD}version <TAG ME>${RESET}"
@@ -79,37 +84,8 @@ done
 
 
 
-
-
-
-
-
-
-
 # Check for rootness
-debug "Checking for root permissions..."
-if [[ $EUID -ne 0 ]]; then
-	error "You must be root to run this script"
-	exit 1
-fi
-
-# Get directory containing scripts
-debug "Getting source directory..."
-SOURCE="${BASH_SOURCE[0]}"
-while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
-  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-  SOURCE="$(readlink "$SOURCE")"
-  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
-done
-SOURCE_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-debug "SOURCE_DIR='${SOURCE_DIR}'"
-
-
-
-
-
-
-
+ensure_root
 
 
 
@@ -130,10 +106,6 @@ if [[ -d "${TARGET_DIR}" ]]; then
 fi
 
 
-
-# Real work
-trap finish EXIT
-
 if [[ ! -d "${TARGET_DIR}" ]]; then
 	status "Creating directory '${TARGET_DIR}'..."
 	run mkdir -p "${TARGET_DIR}"
@@ -147,7 +119,7 @@ status 'Downloading the latest Gentoo Stage 3 tarball...'
 run wget -nv "${MIRROR}/releases/${ARCH}/current-stage3/stage3-${ARCH}-${CURRENT_STAGE3}.tar.bz2"
 
 status 'Downloading the latest Portage tree...'
-run wget "${MIRROR}/snapshots/portage-latest.tar.bz2"
+run wget -nv "${MIRROR}/snapshots/portage-latest.tar.bz2"
 
 status 'Unpacking Gentoo Stage 3 tarball...'
 run tar -xpf stage3-${ARCH}-${CURRENT_STAGE3}.tar.bz2
@@ -163,8 +135,9 @@ run mount --rbind /sys sys/
 status 'Copying /etc/resolve.conf...'
 run cp /etc/resolv.conf etc/
 
-status 'Copying nextoo_init script...'
-run cp "${SOURCE_DIR}/nextoo_init.sh" "${TARGET_DIR}/root/"
+status 'Copying scripts...'
+run cp "${SCRIPT_DIR}/utils.sh" "${TARGET_DIR}/root/"
+run cp "${SCRIPT_DIR}/nextoo_init.sh" "${TARGET_DIR}/root/"
 
 #copy script into the env to run more commands, like env-update and source
 status 'Chrooting...'
@@ -174,5 +147,12 @@ status "Changing working directory back to '${OLD_PWD}'..."
 run cd "${OLD_PWD}"
 
 status 'Cleaning up and tearing down...'
-run "${SOURCE_DIR}/teardown.sh" "${TARGET_DIR}"
+if [[ "${DEBUG}" == 'true' ]]; then
+	run "${SCRIPT_DIR}/teardown_env.sh" --target="${TARGET_DIR}" --debug
+else
+	run "${SCRIPT_DIR}/teardown_env.sh" --target="${TARGET_DIR}"
+fi
 
+debug "Post teardown"
+
+exit 0

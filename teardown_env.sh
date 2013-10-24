@@ -1,15 +1,18 @@
 #!/bin/bash
 # Tears down the NexToo sandbox environment
 
-if [ -x utils.sh ]; then
-	. utils.sh
-else
-	BOLD="\e[1m"
-	RED="\e[31m"
-	RESET="\e[0m"
-	echo echo -e "${RESET}$(date +%H:%m:%S) ${RED}${BOLD}'utils.sh' does not exist or is not executable!${RESET}" >&2
-	exit 1
-fi
+set -e
+
+# Get directory containing scripts
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+	SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+	SOURCE="$(readlink "$SOURCE")"
+	[[ $SOURCE != /* ]] && SOURCE="$SCRIPT_DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+
+source "${SCRIPT_DIR}/utils.sh"
 
 function usage() {
 	echo -e "${RESET}${GREEN}${BOLD}NexToo Environment Setup Script${RESET} ${BOLD}version <TAG ME>${RESET}"
@@ -27,20 +30,11 @@ function usage() {
 
 
 # Check for rootness
-if [[ $EUID -ne 0 ]]; then
-	error "You must be root to run this script"
-	exit 1
-fi
+ensure_root
 
-# Get directory containing scripts
-SOURCE="${BASH_SOURCE[0]}"
-while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
-  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-  SOURCE="$(readlink "$SOURCE")"
-  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
-done
-DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-
+# Control params
+FORCE=false
+TARGET_DIR=
 
 # Get command-line options
 args=$(getopt --shell=bash --options="dfht:" --longoptions="debug,force,help,target:" --name="$(basename \"${0}\")" -- "$@")
@@ -88,10 +82,7 @@ if [[ -z "${TARGET_DIR}" ]]; then
 	exit 1
 fi
 
-
 # Real work
-trap finish EXIT
-
 status "Getting mounts in '${TARGET_DIR}'..."
 mounts=$(cat /proc/mounts | awk '{ print $2 }' | egrep "^${TARGET_DIR}" | tac)
 
@@ -99,3 +90,7 @@ for x in $mounts; do
 	status "Unmounting '${x}'..."
 	run umount "${x}"
 done
+
+status "Teardown complete"
+
+trap - EXIT
