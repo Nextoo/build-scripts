@@ -30,8 +30,7 @@ status "Merging 'layman'..."
 emerge --noreplace --quiet layman
 
 status "Configuring layman..."
-egrep 'http://www.nextoo.org/layman/repositories.xml$' /etc/layman/layman.cfg >/dev/null
-[[ $? -eq '0' ]] || sed -i 's/^overlays  : http:\/\/www.gentoo.org\/proj\/en\/overlays\/repositories.xml$/overlays  : http:\/\/www.gentoo.org\/proj\/en\/overlays\/repositories.xml\n\thttp:\/\/www.nextoo.org\/layman\/repositories.xml/' /etc/layman/layman.cfg
+egrep 'http://www.nextoo.org/layman/repositories.xml$' /etc/layman/layman.cfg >/dev/null || sed -i 's/^overlays  : http:\/\/www.gentoo.org\/proj\/en\/overlays\/repositories.xml$/overlays  : http:\/\/www.gentoo.org\/proj\/en\/overlays\/repositories.xml\n\thttp:\/\/www.nextoo.org\/layman\/repositories.xml/' /etc/layman/layman.cfg
 
 status "Syncing layman..."
 layman -S
@@ -39,10 +38,21 @@ layman -S
 status "Adding NexToo overlay..."
 layman --add nextoo
 
+# Set default make.conf file location
+MAKE_CONF="/etc/portage/make.conf"
 
+# Make sure the make.conf location is set correctly
+if [[ ! -f "${MAKE_CONF}" ]]; then
+	MAKE_CONF="/etc/make.conf"
+	if [[ ! -f "${MAKE_CONF}" ]]; then
+		# Is this even a gentoo install?
+		error "Unable to locate your systems make.conf"
+		exit 1
+	fi
+fi
 
-
-
+status "Updating system make file..."
+egrep '^source /var/lib/layman/make.conf$' "${MAKE_CONF}" >/dev/null || echo 'source /var/lib/layman/make.conf' >> "${MAKE_CONF}"
 
 
 
