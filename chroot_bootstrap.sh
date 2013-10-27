@@ -53,6 +53,18 @@ else
 fi
 
 
+if ! egrep "^\s*PORTAGE_BINHOST=" "${MAKE_CONF}" >/dev/null; then
+	status "Configuring PORTAGE_BINHOST..."
+	echo 'PORTAGE_BINHOST="http://packages.nextoo.org/nextoo-desktop/nextoo-kde/amd64"' >> "${MAKE_CONF}"
+fi
+
+
+if ! egrep "^\s*EMERGE_DEFAULT_OPTS=" "${MAKE_CONF}" >/dev/null; then
+	status "Configuring EMERGE_DEFAULT_OPTS..."
+	echo 'EMERGE_DEFAULT_OPTS="--getbinpkg --quiet"' >> "${MAKE_CONF}"
+fi
+
+
 if [[ "${NEXTOO_BUILD}" == 'true' ]]; then
 	if ! egrep '^\s*FEATURES=' "${MAKE_CONF}" | grep "buildpkg" >/dev/null; then
 		status "Enabling portage 'buildpkg' feature..."
