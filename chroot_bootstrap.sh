@@ -56,7 +56,7 @@ fi
 if [[ "${NEXTOO_BUILD}" == 'true' ]]; then
 	if ! egrep '^\s*FEATURES=' "${MAKE_CONF}" | grep "buildpkg" >/dev/null; then
 		status "Enabling portage 'buildpkg' feature..."
-		echo 'FEATURES="${FEATURES} buildpkg' >> "${MAKE_CONF}"
+		echo 'FEATURES="${FEATURES} buildpkg"' >> "${MAKE_CONF}"
 	else
 		status "Skipping portage 'buildpkg' feature (already enabled)"
 	fi
