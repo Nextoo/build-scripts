@@ -19,7 +19,7 @@ source "${SCRIPT_DIR}/utils.sh"
 
 # (eventually source some config here)
 NEXTOO_GLOBAL_USE="X"
-NEXTOO_PACKAGE_USE_app_arch__p7zip="wxwidgets -test okay cool -blah"
+NEXTOO_PACKAGE_USE_app_arch__p7zip="wxwidgets"
 
 function update_global_use() {
 	local oldifs="${IFS}"
@@ -27,9 +27,15 @@ function update_global_use() {
 	IFS=" \t\n"
 	for flag in ${NEXTOO_GLOBAL_USE}; do
 		if [[ "${flag:0:1}" == '-' ]]; then
-			run euse -D "${flag:1}"
+			# Because euse is broken and returns nonzero if the flag is already disabled, we have to check first
+			if euse -a "${flag:1}" | egrep "^\s*${flag:1}" > /dev/null; then
+				run euse -D "${flag:1}"
+			fi
 		else
-			run euse -E "${flag}"
+			# Because euse is broken and returns nonzero if the flag is already enabled, we have to check first
+			if ! euse -a "${flag:1}" | egrep "^\s*${flag:1}" > /dev/null; then
+				run euse -E "${flag}"
+			fi
 		fi
 	done
 
@@ -62,8 +68,8 @@ function parse_environment {
 	IFS="\n"
 	for x in $(set | egrep "^NEXTOO_PACKAGE_USE_"); do
 		atom="${x#NEXTOO_PACKAGE_USE_}"
-		atom="${atom/__//}"
-		atom="${atom/_/-}"
+		atom="${atom//__//}"
+		atom="${atom//_/-}"
 		category="${atom%%/**}"
 		package="${atom##**/}"
 		package="${package%%=**}"

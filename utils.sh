@@ -9,8 +9,6 @@ YELLOW="\e[33m"
 
 set -e
 
-DEBUG=false
-
 function debug() {
 	if [[ "${DEBUG}" == 'true' ]]; then
 		echo -e "${RESET}$(date +%H:%M:%S) ${BOLD}${YELLOW}${*}${RESET}"
@@ -28,12 +26,13 @@ function error() {
 function run() {
 	local x=0
 
-	debug "exec \"$@\""
-	$@ || x=$?
+	debug "exec \"$*\""
+	"$@" || x=$?
 
 	if [[ "$x" -ne '0' ]]; then
-		error "Running command \"$@\" failed with exit code $x"
+		error "Running command \"$*\" failed with exit code $x"
 	fi
+
 	return $x
 }
 
