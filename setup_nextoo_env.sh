@@ -6,6 +6,7 @@ MIRROR="http://gentoo.closest.myvwan.com/gentoo"
 
 # Internals
 ARCH=amd64
+#NEXTOO_BUILD=false
 SCRIPTS="chroot_bootstrap.sh update_use_flags.sh utils.sh"
 
 set -e
@@ -29,6 +30,7 @@ function usage() {
 		Usage:	$(basename "${0}") [long option(s)] [option(s)] ...
 
 		Options:
+		    -b, --build		Configure environment for building binaries (not needed for user systems)
 		    -d, --debug		Enable debugging output
 		    -f, --force		Use the directory specified by -d even if it exists already
 		    -h, --help		Show this message and exit
@@ -45,12 +47,17 @@ function usage() {
 
 
 # Get command-line options
-args=$(getopt --shell=bash --options="dfht:" --longoptions="debug,force,help,target:" --name="$(basename \"${0}\")" -- "$@")
+args=$(getopt --shell=bash --options="bdfht:" --longoptions="build,debug,force,help,target:" --name="$(basename \"${0}\")" -- "$@")
 if [[ "$?" -ne '0' ]]; then	error 'Terminating'; exit 1; fi
 eval set -- "${args}"
 
 while true; do
 	case "$1" in
+		-b | --build)
+			NEXTOO_BUILD=true
+			shift
+			;;
+
 		-d | --debug)
 			DEBUG=true
 			shift
@@ -143,7 +150,7 @@ run mount --rbind /dev dev/
 run mount --rbind /sys sys/
 
 status 'Chrooting...'
-run env -i TERM="${TERM}" HOME=/root chroot . /bin/bash --init-file /root/nextoo_scripts/chroot_bootstrap.sh -i
+run env -i TERM="${TERM}" HOME=/root NEXTOO_BUILD="${NEXTOO_BUILD}" DEBUG="${DEBUG}" chroot "${TARGET_DIR}" /bin/bash --rcfile /root/nextoo_scripts/chroot_bootstrap.sh -i
 
 status "Changing working directory back to '${OLD_PWD}'..."
 run cd "${OLD_PWD}"

@@ -86,8 +86,8 @@ fi
 status "Getting mounts in '${TARGET_DIR}'..."
 mounts=$(cat /proc/mounts | awk '{ print $2 }' | egrep "^${TARGET_DIR}" | tac)
 
+status "Unmounting chroot filesystems..."
 for x in $mounts; do
-	status "Unmounting '${x}'..."
 	run umount "${x}"
 done
 

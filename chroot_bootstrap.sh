@@ -17,17 +17,17 @@ source "${SCRIPT_DIR}/utils.sh"
 echo -e "${RESET}${GREEN}${BOLD}NexToo Chroot Bootstrap Script${RESET} ${BOLD}version <TAG ME>${RESET}"
 
 
-status 'Configuring prompt...'
-	export PROMPT_COMMAND="export RETVAL=\${?}"
-	export PS1="\[$(tput bold)\]\[$(tput setaf 6)\][NexToo] \[$(tput setaf 1)\]\u@\h \[$(tput setaf 4)\]\w \[$(tput setaf 3)\]\${RETVAL} \[$(tput setaf 7)\][\j] \[$(tput setaf 4)\]\\$\[$(tput sgr0)\] "
-
-
 status 'Updating environment...'
 	env-update
 
 
 status 'Sourcing profile...'
 	source /etc/profile
+
+
+status 'Configuring prompt...'
+	export PROMPT_COMMAND="export RETVAL=\${?}"
+	export PS1="\[$(tput bold)\]\[$(tput setaf 6)\][NexToo] \[$(tput setaf 1)\]\u@\h \[$(tput setaf 4)\]\w \[$(tput setaf 3)\]\${RETVAL} \[$(tput setaf 7)\][\j] \[$(tput setaf 4)\]\\$\[$(tput sgr0)\] "
 
 
 status 'Locating make.conf...'
@@ -53,6 +53,16 @@ else
 fi
 
 
+if [[ "${NEXTOO_BUILD}" == 'true' ]]; then
+	if ! egrep '^\s*FEATURES=' "${MAKE_CONF}" | grep "buildpkg" >/dev/null; then
+		status "Enabling portage 'buildpkg' feature..."
+		echo 'FEATURES="${FEATURES} buildpkg' >> "${MAKE_CONF}"
+	else
+		status "Skipping portage 'buildpkg' feature (already enabled)"
+	fi
+fi
+
+
 status "Configuring USE flags..."
 	run "${SCRIPT_DIR}/update_use_flags.sh"
 
@@ -73,8 +83,12 @@ status "Syncing layman..."
 	run layman --sync-all
 
 
-status "Adding NexToo overlay..."
+if ! layman --list-local | egrep " * nextoo " >/dev/null; then
+	status "Adding NexToo overlay..."
 	run layman --add nextoo
+else
+	status "Skipping add NexToo overlay (already added)"
+fi
 
 
 status "Updating system make file..."
