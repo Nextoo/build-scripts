@@ -1,12 +1,12 @@
 #!/bin/bash
 # Creates a directory in the current directory and performs the setup required for development of NexToo
 
-CURRENT_STAGE3="20131010"
+CURRENT_STAGE3="20131024"
 MIRROR="http://gentoo.closest.myvwan.com/gentoo"
 
 # Internals
 ARCH=amd64
-SCRIPTS="chroot_bootstrap.sh utils.sh"
+SCRIPTS="chroot_bootstrap.sh update_use_flags.sh utils.sh"
 
 set -e
 

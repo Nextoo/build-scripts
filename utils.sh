@@ -12,7 +12,9 @@ set -e
 DEBUG=false
 
 function debug() {
-	[[ "${DEBUG}" == 'true' ]] && echo -e "${RESET}$(date +%H:%M:%S) ${BOLD}${YELLOW}${*}${RESET}"
+	if [[ "${DEBUG}" == 'true' ]]; then
+		echo -e "${RESET}$(date +%H:%M:%S) ${BOLD}${YELLOW}${*}${RESET}"
+	fi
 }
 
 function finish() {
@@ -24,8 +26,15 @@ function error() {
 }
 
 function run() {
-	debug "exec \"$*\""
-	$*
+	local x=0
+
+	debug "exec \"$@\""
+	$@ || x=$?
+
+	if [[ "$x" -ne '0' ]]; then
+		error "Running command \"$@\" failed with exit code $x"
+	fi
+	return $x
 }
 
 function status() {

@@ -13,6 +13,7 @@ source "${SCRIPT_DIR}/utils.sh"
 
 echo -e "${RESET}${GREEN}${BOLD}NexToo Chroot Bootstrap Script${RESET} ${BOLD}version <TAG ME>${RESET}"
 
+
 status 'Updating environment...'
 env-update
 
@@ -23,6 +24,9 @@ export PROMPT_COMMAND="export RETVAL=\${?}"
 export PS1="\[$(tput bold)\]\[$(tput setaf 6)\][NexToo] \[$(tput setaf 1)\]\u@\h \[$(tput setaf 4)\]\w \[$(tput setaf 3)\]\${RETVAL} \[$(tput setaf 7)\][\j] \[$(tput setaf 4)\]\\$\[$(tput sgr0)\] "
 
 
+
+status "Configuring USE flags..."
+run "${SCRIPT_DIR}/update_use_flags.sh"
 
 
 # Configure the environment for NexToo
@@ -55,6 +59,7 @@ status "Updating system make file..."
 egrep '^source /var/lib/layman/make.conf$' "${MAKE_CONF}" >/dev/null || echo 'source /var/lib/layman/make.conf' >> "${MAKE_CONF}"
 
 
+export MAKEOPTS="-j$(($(nproc) + $(nproc)/2))"
 
 
 
