@@ -61,7 +61,7 @@ fi
 
 if ! egrep "^\s*EMERGE_DEFAULT_OPTS=" "${MAKE_CONF}" >/dev/null; then
 	status "Configuring EMERGE_DEFAULT_OPTS..."
-	echo "EMERGE_DEFAULT_OPTS=\"--getbinpkg --quiet --jobs=$(ncpus)\"" >> "${MAKE_CONF}"
+	echo "EMERGE_DEFAULT_OPTS=\"--getbinpkg --quiet --jobs=$(nproc)\"" >> "${MAKE_CONF}"
 fi
 
 
