@@ -18,10 +18,12 @@ source "${SCRIPT_DIR}/utils.sh"
 
 
 # (eventually source some config here, right now this is config for nextoo-desktop/nextoo-kde)
-NEXTOO_GLOBAL_USE="mysql declarative qt3support X a52 aac acpi alsa apng avahi bash-completion bluray btrfs c++0x cairo cdda cddb consolekit cryptsetup cups dbus dts dvd encode fat flac fontconfig gd gif gimp gudev hfs hwdb icu jpeg kate kde libass libsamplerate mdadm mdnsresponder-compat minizip mmx mng mp3 mtp multimedia musepack nfsv41 nsplugin ntfs ocr ogg okteta openal opengl pdf pdo png policykit postgres postscript pulseaudio python qml qt4 qthelp rar rbd rdesktop realtime reviewboard rtsp samba sasl scanner script sdl sdl-image semantic-desktop shine shout speech sql sse sse2 svg switcher taglib theora tiff tools tracker transcode truetype udev upnp upnp-av v4l vaapi vcdx vnc vorbis webkit winbind x264 xcomposite xinerama xml xmp xosd xv -lcx -snappy -tor"
+NEXTOO_GLOBAL_USE="mysql declarative qt3support X a52 aac acpi alsa apng avahi bash-completion bluray btrfs c++0x cairo cdda cddb consolekit cryptsetup cups dbus dts dvd encode fat flac fontconfig gd gif gimp gudev hfs hwdb icu jpeg kate kde libass libsamplerate mdadm mdnsresponder-compat minizip mmx mng mp3 mtp multimedia musepack nfsv41 nsplugin ntfs ocr ogg okteta openal opengl pdf pdo png policykit postgres postscript pulseaudio python qml qt4 qthelp rar rbd rdesktop realtime reviewboard rtsp samba sasl scanner script sdl sdl-image semantic-desktop shine shout speech sql sse sse2 svg switcher taglib theora tiff tools tracker transcode truetype udev upnp upnp-av v4l vaapi vcdx vnc vorbis webkit winbind x264 xcomposite xinerama xml xmp xosd xv -lcx -snappy -tor sqlite"
 NEXTOO_PACKAGE_USE_app_arch__p7zip="wxwidgets"
 NEXTOO_PACKAGE_USE_net_fs__cifs_utils="-acl"
 NEXTOO_PACKAGE_USE_net_libs__libproxy="-webkit"
+#NEXTOO_PACKAGE_USE_dev_lang__python="sqlite"
+
 
 function update_global_use() {
 	local oldifs="${IFS}"
