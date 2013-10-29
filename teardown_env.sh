@@ -37,7 +37,7 @@ FORCE=false
 TARGET_DIR=
 
 # Get command-line options
-args=$(getopt --shell=bash --options="dfht:" --longoptions="debug,force,help,target:" --name="$(basename \"${0}\")" -- "$@")
+args=$(getopt --shell=bash --options="dfht:" --longoptions="debug,force,help,target:" --name="$(basename "${0}")" -- "$@")
 if [[ "$?" -ne '0' ]]; then	error 'Terminating'; exit 1; fi
 eval set -- "${args}"
 
