@@ -83,12 +83,9 @@ if [[ -z "${TARGET_DIR}" ]]; then
 fi
 
 # Real work
-status "Getting mounts in '${TARGET_DIR}'..."
-mounts=$(cat /proc/mounts | awk '{ system("echo \"" $2 "\"") }' | egrep "^${TARGET_DIR}" | tac)
-
-status "Unmounting chroot filesystems..."
-for x in $mounts; do
+status "Unmounting chroot filesystems in '${TARGET_DIR}'..."
+while IFS= read -r -d '' x; do
 	run umount "${x}"
-done
+done < <(cat /proc/mounts | tac | awk -vORS=$'\\0' '{ print $2 }' | xargs -0 -L1 printf '%b\0' | egrep --text --null-data "^${TARGET_DIR}")
 
 status "Teardown complete"
