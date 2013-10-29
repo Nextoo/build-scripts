@@ -47,7 +47,7 @@ function usage() {
 
 
 # Get command-line options
-args=$(getopt --shell=bash --options="bdfht:" --longoptions="build,debug,force,help,target:" --name="$(basename \"${0}\")" -- "$@")
+args=$(getopt --shell=bash --options="bdfht:" --longoptions="build,debug,force,help,target:" --name="$(basename "${0}")" -- "$@")
 if [[ "$?" -ne '0' ]]; then	error 'Terminating'; exit 1; fi
 eval set -- "${args}"
 
