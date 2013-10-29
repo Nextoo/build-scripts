@@ -84,7 +84,7 @@ fi
 
 # Real work
 status "Getting mounts in '${TARGET_DIR}'..."
-mounts=$(cat /proc/mounts | awk '{ print $2 }' | egrep "^${TARGET_DIR}" | tac)
+mounts=$(cat /proc/mounts | awk '{ system("echo \"" $2 "\"") }' | egrep "^${TARGET_DIR}" | tac)
 
 status "Unmounting chroot filesystems..."
 for x in $mounts; do
