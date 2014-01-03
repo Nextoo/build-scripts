@@ -11,7 +11,7 @@ set -e
 
 function debug() {
 	if [[ "${DEBUG}" == 'true' ]]; then
-		echo -e "${RESET}$(date +%H:%M:%S) ${BOLD}${YELLOW}${*}${RESET}"
+		echo -e "${RESET}$(date +%Y-%m%d\ %H:%M:%S) ${BOLD}${YELLOW}${*}${RESET}"
 	fi
 }
 
@@ -20,7 +20,7 @@ function finish() {
 }
 
 function error() {
-	echo -e "${RESET}$(date +%H:%M:%S) ${RED}${BOLD}${*}${RESET}" >&2
+	echo -e "${RESET}$(date +%Y-%m%d\ %H:%M:%S) ${RED}${BOLD}${*}${RESET}" >&2
 }
 
 function run() {
@@ -37,7 +37,7 @@ function run() {
 }
 
 function status() {
-	echo -e "${RESET}$(date +%H:%M:%S) ${BOLD}${*}${RESET}"
+	echo -e "${RESET}$(date +%Y-%m%d\ %H:%M:%S) ${BOLD}${*}${RESET}"
 }
 
 function ensure_root() {
