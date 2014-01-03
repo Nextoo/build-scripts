@@ -1,7 +1,7 @@
 #!/bin/bash
 # Creates a directory in the current directory and performs the setup required for development of NexToo
 
-CURRENT_STAGE3="20131024"
+CURRENT_STAGE3="20131226"
 MIRROR="http://gentoo.closest.myvwan.com/gentoo"
 
 # Internals
