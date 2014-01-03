@@ -75,10 +75,6 @@ if [[ "${NEXTOO_BUILD}" == 'true' ]]; then
 fi
 
 
-status "Configuring USE flags..."
-	run "${SCRIPT_DIR}/update_use_flags.sh"
-
-
 status "Merging 'layman'..."
 	run emerge --noreplace --quiet app-portage/layman
 
