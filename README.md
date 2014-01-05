@@ -9,9 +9,9 @@ To build NexToo binaries for a given profile, try this:
 mkdir /tmp/nextoo-build
 cd /tmp/nextoo-build
 git clone https://github.com/nextoo/build-scripts.git
-bash build-scripts/build.sh --target=/tmp/nextoo-build/target nextoo:0.0.1/default/linux/amd64/server/router
+bash build-scripts/build.sh /tmp/nextoo-build/target nextoo:0.0.1/default/linux/amd64/server/router
 ```
 
 (In this case, the profile is `nextoo:0.0.1/default/linux/amd64/server/router`, and `/tmp/nextoo-build/target` is the build directory)
 
-Note that you must be root to run this since chroot is used during the environment setup.
+Note that you must be root to run this since 'mount' is used during the environment setup, and a chroot is used for the actual build.
