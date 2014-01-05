@@ -11,7 +11,10 @@ SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
 
 source "${SCRIPT_DIR}/utils.sh"
 
-
+if [[ -z "${TARGET_PROFILE}" ]]; then
+	error "TARGET_PROFILE is undefined"
+	exit 1
+fi
 
 
 echo -e "${RESET}${GREEN}${BOLD}NexToo Chroot Bootstrap Script${RESET} ${BOLD}version <TAG ME>${RESET}"
@@ -105,7 +108,23 @@ status "Updating system make file..."
 	fi
 
 
+status "Setting profile to ${TARGET_PROFILE}..."
+	# Might want to check to see if the profile is already set. Use eselect profile show...
+	eselect profile set ${TARGET_PROFILE}
+
 status "Environment setup complete"
+
+status "Emerging world..."
+	emerge -DNu @world
+
+status "Emerge complete!"
+
+# Check some flag for pushing binaries to a depot
+
+if [[ "${DEBUG}" != "true" ]]; then
+	status "Exiting chroot..."
+	exit
+fi
 
 cd "${HOME}"
 set +e

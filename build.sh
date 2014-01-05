@@ -27,28 +27,29 @@ trap finish EXIT
 function usage() {
 	echo -e "${RESET}${GREEN}${BOLD}NexToo Build Script${RESET} ${BOLD}version <TAG ME>${RESET}"
 	cat <<-EOU
-		Usage:	$(basename "${0}") [long option(s)] [option(s)] <profile>
+		Usage:	$(basename "${0}") [long option(s)] [option(s)] <build path> <profile>
 
 		Options:
 		    -b, --build		Configure environment for building binaries (not needed for user systems)
 		    -d, --debug		Enable debugging output
 		    -f, --force		Use the directory specified by -d even if it exists already
 		    -h, --help		Show this message and exit
-		    -t, --target	Path to directory environment should be created in
 
-		An (empty) directory must always be specified. If not empty, the -f option must be
-		present and may lead to unpredictable results.
+		An (empty) directory must always be specified as the build path. If not empty, the -f option
+		must be present and may lead to unpredictable results.
 
-		The profile is specified in the form of nextoo:0.0.1/default/linux/amd64/server/router.
+		The profile is specified as in "nextoo:0.0.1/default/linux/amd64/server/router".
 
 	EOU
 }
 
 
 # Get command-line options
-args=$(getopt --shell=bash --options="bdfht:" --longoptions="build,debug,force,help,target:" --name="$(basename "${0}")" -- "$@")
+args=$(getopt --shell=bash --options="bdfh" --longoptions="build,debug,force,help" --name="$(basename "${0}")" -- "$@")
 if [[ "$?" -ne '0' ]]; then	error 'Terminating'; exit 1; fi
 eval set -- "${args}"
+
+state=options
 
 while true; do
 	case "$1" in
@@ -72,22 +73,36 @@ while true; do
 			exit 0
 			;;
 
-		-t | --target)
-			TARGET_DIR="${2}"
-			shift 2
-			;;
-
 		--)
-			shift;
-			break;
+			state=target_dir
+			shift
 			;;
 
 		*)
-			usage
-			exit 1
+			case "${state}" in
+				target_dir)
+					TARGET_DIR="${1}"
+					state=target_profile
+					;;
+
+				target_profile)
+					TARGET_PROFILE="${1}"
+					state=too_many_params
+					;;
+
+				too_many_params)
+					# If there is no additional parameter, work is done
+					[[ -z "${1}" ]] && break
+					echo "Unrecognized parameter \"${1}\""
+					usage
+					exit 1
+					;;
+			esac
+			shift
 			;;
 	esac
 done
+
 
 
 
@@ -149,7 +164,7 @@ run mount --rbind /dev dev/
 run mount --rbind /sys sys/
 
 status 'Chrooting...'
-run env -i TERM="${TERM}" HOME=/root NEXTOO_BUILD="${NEXTOO_BUILD}" DEBUG="${DEBUG}" chroot "${TARGET_DIR}" /bin/bash --rcfile /root/nextoo_scripts/chroot_bootstrap.sh -i
+run env -i TERM="${TERM}" HOME=/root NEXTOO_BUILD="${NEXTOO_BUILD}" DEBUG="${DEBUG}" TARGET_PROFILE="${TARGET_PROFILE}" chroot "${TARGET_DIR}" /bin/bash --rcfile /root/nextoo_scripts/chroot_bootstrap.sh -i
 
 status "Changing working directory back to '${OLD_PWD}'..."
 run cd "${OLD_PWD}"
