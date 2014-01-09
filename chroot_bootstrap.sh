@@ -27,10 +27,13 @@ status 'Updating environment...'
 status 'Sourcing profile...'
 	source /etc/profile
 
-
-status 'Configuring prompt...'
+if [[ -z "${PS1}" ]]; then
+	status 'Not configuring prompt (not a terminal)'
+else
+	status 'Configuring prompt...'
 	export PROMPT_COMMAND="export RETVAL=\${?}"
 	export PS1="\[$(tput bold)\]\[$(tput setaf 6)\][Nextoo] \[$(tput setaf 1)\]\u@\h \[$(tput setaf 4)\]\w \[$(tput setaf 3)\]\${RETVAL} \[$(tput setaf 7)\][\j] \[$(tput setaf 4)\]\\$\[$(tput sgr0)\] "
+fi
 
 
 status 'Locating make.conf...'
