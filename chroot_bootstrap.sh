@@ -119,6 +119,14 @@ status "Setting profile to ${TARGET_PROFILE}..."
 
 status "Environment setup complete"
 
+status "Checking for profile-specific bootstrap.sh in /etc/portage/make.profile/..."
+	if [[ -x /etc/portage/make.profile/bootstrap.sh ]]; then
+		status "Executing profile-specific bootstrap.sh..."
+		run /etc/portage/make.profile/bootstrap.sh
+	else
+		status "No profile-specific bootstrap.sh"
+	fi
+
 status "Emerging world..."
 	emerge -DNu @world
 
