@@ -67,6 +67,11 @@ if ! egrep "^\s*EMERGE_DEFAULT_OPTS=" "${MAKE_CONF}" >/dev/null; then
 	echo "EMERGE_DEFAULT_OPTS=\"--getbinpkg --quiet --jobs=$(nproc)\"" >> "${MAKE_CONF}"
 fi
 
+if ! egrep "^\s*ACCEPT_LICENSE=" "${MAKE_CONF}" >/dev/null; then
+  status "Configuring ACCEPT_LICENSE"
+  echo "ACCEPT_LICENSE=\"*\"" >> "${MAKE_CONF}"
+fi
+
 
 if [[ "${NEXTOO_BUILD}" == 'true' ]]; then
 	if ! egrep '^\s*FEATURES=' "${MAKE_CONF}" | grep "buildpkg" >/dev/null; then
