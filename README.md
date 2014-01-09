@@ -1,9 +1,9 @@
 build-scripts
 =============
 
-This repository holds scripts used to automate the build, test, and deployment of NexToo.
+This repository holds scripts used to automate the build, test, and deployment of Nextoo.
 
-To build NexToo binaries for a given profile, try this:
+To build Nextoo binaries for a given profile, try this:
 
 ```
 mkdir /tmp/nextoo-build

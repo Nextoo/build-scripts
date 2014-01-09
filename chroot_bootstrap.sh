@@ -17,7 +17,7 @@ if [[ -z "${TARGET_PROFILE}" ]]; then
 fi
 
 
-echo -e "${RESET}${GREEN}${BOLD}NexToo Chroot Bootstrap Script${RESET} ${BOLD}version <TAG ME>${RESET}"
+echo -e "${RESET}${GREEN}${BOLD}Nextoo Chroot Bootstrap Script${RESET} ${BOLD}version <TAG ME>${RESET}"
 
 
 status 'Updating environment...'
@@ -30,7 +30,7 @@ status 'Sourcing profile...'
 
 status 'Configuring prompt...'
 	export PROMPT_COMMAND="export RETVAL=\${?}"
-	export PS1="\[$(tput bold)\]\[$(tput setaf 6)\][NexToo] \[$(tput setaf 1)\]\u@\h \[$(tput setaf 4)\]\w \[$(tput setaf 3)\]\${RETVAL} \[$(tput setaf 7)\][\j] \[$(tput setaf 4)\]\\$\[$(tput sgr0)\] "
+	export PS1="\[$(tput bold)\]\[$(tput setaf 6)\][Nextoo] \[$(tput setaf 1)\]\u@\h \[$(tput setaf 4)\]\w \[$(tput setaf 3)\]\${RETVAL} \[$(tput setaf 7)\][\j] \[$(tput setaf 4)\]\\$\[$(tput sgr0)\] "
 
 
 status 'Locating make.conf...'
@@ -95,10 +95,10 @@ status "Syncing layman..."
 
 
 if ! layman --list-local | egrep " * nextoo " >/dev/null; then
-	status "Adding NexToo overlay..."
+	status "Adding Nextoo overlay..."
 	run layman --add nextoo
 else
-	status "Skipping add NexToo overlay (already added)"
+	status "Skipping add Nextoo overlay (already added)"
 fi
 
 

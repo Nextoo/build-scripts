@@ -1,5 +1,5 @@
 #!/bin/bash
-# Creates a directory in the current directory and performs the setup required for development of NexToo
+# Creates a directory in the current directory and performs the setup required for development of Nextoo
 
 CURRENT_STAGE3="20131226"
 MIRROR="http://gentoo.closest.myvwan.com/gentoo"
@@ -25,7 +25,7 @@ trap finish EXIT
 
 
 function usage() {
-	echo -e "${RESET}${GREEN}${BOLD}NexToo Build Script${RESET} ${BOLD}version <TAG ME>${RESET}"
+	echo -e "${RESET}${GREEN}${BOLD}Nextoo Build Script${RESET} ${BOLD}version <TAG ME>${RESET}"
 	cat <<-EOU
 		Usage:	$(basename "${0}") [long option(s)] [option(s)] <build path> <profile>
 

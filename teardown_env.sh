@@ -1,5 +1,5 @@
 #!/bin/bash
-# Tears down the NexToo sandbox environment
+# Tears down the Nextoo sandbox environment
 
 set -e
 
@@ -15,7 +15,7 @@ SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
 source "${SCRIPT_DIR}/utils.sh"
 
 function usage() {
-	echo -e "${RESET}${GREEN}${BOLD}NexToo Environment Setup Script${RESET} ${BOLD}version <TAG ME>${RESET}"
+	echo -e "${RESET}${GREEN}${BOLD}Nextoo Environment Setup Script${RESET} ${BOLD}version <TAG ME>${RESET}"
 	cat <<-EOU
 		Usage:	$(basename "${0}") [long option(s)] [option(s)] ...
 
