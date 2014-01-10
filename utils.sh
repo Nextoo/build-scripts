@@ -1,5 +1,5 @@
 #!/bin/bash
-# A set of pre-defined variables and common functions used by NexToo scripts
+# A set of pre-defined variables and common functions used by Nextoo scripts
 
 BOLD="\e[1m"
 RED="\e[31m"
