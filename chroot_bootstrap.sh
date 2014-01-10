@@ -91,12 +91,12 @@ status "Creating missing directories..."
 	run mkdir -p /run/lock
 
 
-if grep "time zone must be set" /etc/localtime; then
+if grep "time zone must be set" /etc/localtime >/dev/null; then
 	status "Updating timezone to 'America/Los_Angeles'..."
 	cd /etc
 	run rm localtime
 	run ln -s ../usr/share/zoneinfo/America/Los_Angeles localtime
-	cd -
+	cd - >/dev/null
 else
 	status "Not touching timezone"
 fi
