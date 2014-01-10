@@ -82,9 +82,16 @@ if [[ "${NEXTOO_BUILD}" == 'true' ]]; then
 	fi
 fi
 
+# Temporary debug stuffs
+status "Printing emerge info..."
+run emerge --info
 
 status "Merging 'layman'..."
 	run emerge --noreplace --quiet app-portage/layman
+
+# Temporary debug stuffs
+status "Printing emerge info..."
+run emerge --info
 
 
 status "Configuring layman..."
@@ -106,6 +113,10 @@ else
 	status "Skipping add NexToo overlay (already added)"
 fi
 
+# Temporary debug stuffs
+status "Printing emerge info..."
+run emerge --info
+
 
 status "Updating system make file..."
 	if ! egrep '^\s*source /var/lib/layman/make.conf$' "${MAKE_CONF}" >/dev/null; then
@@ -126,6 +137,10 @@ status "Checking for profile-specific bootstrap.sh in /etc/portage/make.profile/
 	else
 		status "No profile-specific bootstrap.sh"
 	fi
+
+# Temporary debug stuffs
+status "Printing emerge info..."
+run emerge --info
 
 status "Emerging world..."
 	emerge -DNu @world
