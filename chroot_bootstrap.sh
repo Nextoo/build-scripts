@@ -133,6 +133,10 @@ status "Setting profile to ${TARGET_PROFILE}..."
 
 status "Environment setup complete"
 
+# Temporary debug stuffs
+status "Printing emerge info..."
+run emerge --info
+
 status "Checking for profile-specific bootstrap.sh in /etc/portage/make.profile/..."
 	if [[ -x /etc/portage/make.profile/bootstrap.sh ]]; then
 		status "Executing profile-specific bootstrap.sh..."
