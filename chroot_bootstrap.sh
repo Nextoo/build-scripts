@@ -65,11 +65,12 @@ fi
 #fi
 
 
-if ! egrep "^\s*EMERGE_DEFAULT_OPTS=" "${MAKE_CONF}" >/dev/null; then
-	status "Configuring EMERGE_DEFAULT_OPTS..."
-	echo "EMERGE_DEFAULT_OPTS=\"--getbinpkg --quiet --jobs=$(nproc)\"" >> "${MAKE_CONF}"
-fi
+#if ! egrep "^\s*EMERGE_DEFAULT_OPTS=" "${MAKE_CONF}" >/dev/null; then
+#	status "Configuring EMERGE_DEFAULT_OPTS..."
+#	echo "EMERGE_DEFAULT_OPTS=\"--quiet --jobs=1\"" >> "${MAKE_CONF}"
+#fi
 
+# ONLY DO THIS ON A BUILD MACHINE, CLIENTS MUST STILL ACKNOWLEDGE AND ACCEPT LICENSES!
 if ! egrep "^\s*ACCEPT_LICENSE=" "${MAKE_CONF}" >/dev/null; then
 	status "Configuring ACCEPT_LICENSE"
 	echo "ACCEPT_LICENSE=\"*\"" >> "${MAKE_CONF}"
