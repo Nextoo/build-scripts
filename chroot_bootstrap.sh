@@ -71,8 +71,8 @@ if ! egrep "^\s*EMERGE_DEFAULT_OPTS=" "${MAKE_CONF}" >/dev/null; then
 fi
 
 if ! egrep "^\s*ACCEPT_LICENSE=" "${MAKE_CONF}" >/dev/null; then
-  status "Configuring ACCEPT_LICENSE"
-  echo "ACCEPT_LICENSE=\"*\"" >> "${MAKE_CONF}"
+	status "Configuring ACCEPT_LICENSE"
+	echo "ACCEPT_LICENSE=\"*\"" >> "${MAKE_CONF}"
 fi
 
 
@@ -85,16 +85,25 @@ if [[ "${NEXTOO_BUILD}" == 'true' ]]; then
 	fi
 fi
 
-# Temporary debug stuffs
-status "Printing emerge info..."
-run emerge --info
+
+status "Creating missing directories..."
+	status ".../run/lock"
+	run mkdir -p /run/lock
+
+
+if grep "time zone must be set" /etc/localtime; then
+	status "Updating timezone to 'America/Los_Angeles'..."
+	cd /etc
+	run rm localtime
+	run ln -s ../usr/share/zoneinfo/America/Los_Angeles localtime
+	cd -
+else
+	status "Not touching timezone"
+fi
+
 
 status "Merging 'layman'..."
 	run emerge --noreplace --quiet app-portage/layman
-
-# Temporary debug stuffs
-status "Printing emerge info..."
-run emerge --info
 
 
 status "Configuring layman..."
@@ -116,9 +125,10 @@ else
 	status "Skipping add Nextoo overlay (already added)"
 fi
 
+
 # Temporary debug stuffs
 status "Printing emerge info..."
-run emerge --info
+	run emerge --info
 
 
 status "Updating system make file..."
@@ -135,7 +145,10 @@ status "Environment setup complete"
 
 # Temporary debug stuffs
 status "Printing emerge info..."
-run emerge --info
+	run emerge --info
+
+status "Merging Nextoo kernel..."
+	run emerge nextoo-kernel
 
 status "Checking for profile-specific bootstrap.sh in /etc/portage/make.profile/..."
 	if [[ -x /etc/portage/make.profile/bootstrap.sh ]]; then
@@ -147,7 +160,7 @@ status "Checking for profile-specific bootstrap.sh in /etc/portage/make.profile/
 
 # Temporary debug stuffs
 status "Printing emerge info..."
-run emerge --info
+	run emerge --info
 
 status "Emerging world..."
 	emerge -DNu @world
