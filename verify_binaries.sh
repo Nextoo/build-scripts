@@ -52,28 +52,31 @@ verify() {
 	local SH=""
 	local SZ=""
 
-	# Compare MD5
+	# Make sure we have both the recorded MD5 and the files actual MD5
 	if [[ $MD5 == "" || $AMD5 == "" ]]; then
 		MD="${YELLOW}"
 	else
+		# Compare MD5
 		[[ $AMD5 == $MD5 ]] && MD="${GREEN}" || MD="${RED}"
 	fi
 	# Format for echo
 	MD="${MD}MD5"
 
-	# Compare SHA1
+	# Make sure we have both the recorded SHA1 and the files actual SHA1
 	if [[ $SHA1 == "" || $ASHA1 == "" ]]; then
 		SH="${YELLOW}"
 	else
+		# Compare SHA1
 		[[ $ASHA1 == $SHA1 ]] && SH="${GREEN}" || SH="${RED}"
 	fi
 	# Format for echo
 	SH="${SH}SHA1"
 
-	# Compare size
+	# Make sure we have both the recorded size and the files actual size
 	if [[ $SIZE == "" || $AS == "" ]]; then
-		SIZE="${YELLOW}"
+		SZ="${YELLOW}"
 	else
+		# Compare size
 		[[ $AS == $SIZE ]] && SZ="${GREEN}" || SZ="${RED}"
 	fi
 	# Format for echo
