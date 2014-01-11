@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # The packages directory
-#PKGSDIR=/home/bjmn55/temp
 PKGSDIR=/usr/portage/packages
 # The packages file name, default: Packages
 PKGSFILE=Packages
