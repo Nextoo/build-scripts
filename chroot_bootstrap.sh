@@ -93,6 +93,9 @@ status "Creating missing directories..."
 	status ".../run/shm"
 	run mkdir -p /run/shm
 
+status "Mounting /run/shm as a tmpfs"
+	run mount -t tmpfs -o mode=1777 tmpfs /run/shm
+
 
 if grep "time zone must be set" /etc/localtime >/dev/null; then
 	status "Updating timezone to 'America/Los_Angeles'..."
