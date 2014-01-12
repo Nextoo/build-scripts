@@ -90,6 +90,8 @@ fi
 status "Creating missing directories..."
 	status ".../run/lock"
 	run mkdir -p /run/lock
+	status ".../run/shm"
+	run mkdir -p /run/shm
 
 
 if grep "time zone must be set" /etc/localtime >/dev/null; then
