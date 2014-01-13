@@ -8,7 +8,7 @@ DEBUG=1
 
 # are we running as root?
 if [[ $EUID -ne 0 ]]; then
-	echo "You must be root to run this script"
+	echo "You must be root to run this script" >&2
 	exit 1
 fi
 
@@ -86,8 +86,8 @@ else
 	fi
 fi
 
-if [[ $ERR != "" ]]; then
-	echo $ERR
+if [[ "${ERR}" != "" ]]; then
+	echo $ERR >&2
 	exit 1
 fi
 
@@ -102,7 +102,7 @@ if [[ ! -e $NEXTOO_PATH ]]; then
 	echo "Creating directory for Nextoo repo"
 	mkdir -p $NEXTOO_PATH
 	if [[ $? -ne '0' ]]; then
-		echo "Error creating Nextoo repo directory."
+		echo "Error creating Nextoo repo directory." >&2
 		exit 1
 	fi
 	# change to that directory
