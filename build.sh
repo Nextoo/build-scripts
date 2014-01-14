@@ -178,3 +178,5 @@ else
 fi
 
 status "Finished!"
+
+exit 0
