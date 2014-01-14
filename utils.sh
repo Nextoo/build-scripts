@@ -46,3 +46,7 @@ function ensure_root() {
 		exit 1
 	fi
 }
+
+function define() {
+	IFS='\n' read -r -d '' ${1} || true
+}

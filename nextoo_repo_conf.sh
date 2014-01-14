@@ -30,7 +30,7 @@ if [[ "${EUID}" -ne '0' ]]; then
 fi
 
 # Store the Nextoo repo config info
-read -d '' NEXTOO_CONF << EOL
+define NEXTOO_CONF <<EOL
 [nextoo]
 	location = $NEXTOO_PATH/portage
 	sync-type = git
