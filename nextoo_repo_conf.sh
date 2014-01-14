@@ -1,8 +1,24 @@
 #!/bin/bash
+
+# Defaults
 REPOS_CONF=/etc/portage/repos.conf
 # This will get a directory 'portage' added to it under which the Nextoo repo will go
 NEXTOO_PATH=/usr/nextoo
 NEXTOO_PORTAGE_URI=https://github.com/Nextoo/portage-overlay.git
+
+# Get directory containing scripts
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+	SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+	SOURCE="$(readlink "$SOURCE")"
+	[[ $SOURCE != /* ]] && SOURCE="$SCRIPT_DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+
+source "${SCRIPT_DIR}/utils.sh"
+
+# Enable debug output if requested
+[[ "${DEBUG}" == "true" ]] && set -x
 
 # Exit immediately on any unhandled error
 set -e
