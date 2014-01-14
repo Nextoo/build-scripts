@@ -29,7 +29,7 @@ status 'Updating environment...'
 status 'Sourcing profile...'
 	source /etc/profile
 
-if [[ -t "0" || -p /dev/stdin ]]; then
+if [[ $- == *i* ]]; then
 	status 'Configuring prompt...'
 	export PROMPT_COMMAND="export RETVAL=\${?}"
 	export PS1="\[$(tput bold)\]\[$(tput setaf 6)\][Nextoo] \[$(tput setaf 1)\]\u@\h \[$(tput setaf 4)\]\w \[$(tput setaf 3)\]\${RETVAL} \[$(tput setaf 7)\][\j] \[$(tput setaf 4)\]\\$\[$(tput sgr0)\] "
