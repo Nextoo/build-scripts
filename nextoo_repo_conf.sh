@@ -43,9 +43,7 @@ if [[ -e $REPOS_CONF ]]; then
 			# but doesn't have a listing for the nextoo repo, so add it
 			if [[ -w $REPOS_CONF ]]; then
 
-				# The line break is here in purpose...
-				echo "
-${NEXTOO_CONF}" >> $REPOS_CONF
+				echo -e "\n${NEXTOO_CONF}" >> $REPOS_CONF
 			else
 				# but it's not writable
 				ERR="repos.conf is not writable. Please run this script as root."
