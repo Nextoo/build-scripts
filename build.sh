@@ -9,6 +9,7 @@ ARCH=amd64
 #NEXTOO_BUILD=false
 SCRIPTS="chroot_bootstrap.sh nextoo_repo_conf.sh update_use_flags.sh utils.sh"
 
+# Exit immediately on failure
 set -e
 
 # Get directory containing scripts

@@ -19,6 +19,8 @@ fi
 
 echo -e "${RESET}${GREEN}${BOLD}Nextoo Chroot Bootstrap Script${RESET} ${BOLD}version <TAG ME>${RESET}"
 
+# Enable debug output if requested
+[[ "${DEBUG}" == "true" ]] && set -x
 
 status 'Updating environment...'
 	env-update
@@ -27,12 +29,12 @@ status 'Updating environment...'
 status 'Sourcing profile...'
 	source /etc/profile
 
-if [[ -z "${PS1}" ]]; then
-	status 'Not configuring prompt (not a terminal)'
-else
+if [[ -t "0" || -p /dev/stdin ]]; then
 	status 'Configuring prompt...'
 	export PROMPT_COMMAND="export RETVAL=\${?}"
 	export PS1="\[$(tput bold)\]\[$(tput setaf 6)\][Nextoo] \[$(tput setaf 1)\]\u@\h \[$(tput setaf 4)\]\w \[$(tput setaf 3)\]\${RETVAL} \[$(tput setaf 7)\][\j] \[$(tput setaf 4)\]\\$\[$(tput sgr0)\] "
+else
+	status 'Not configuring prompt (not a terminal)'
 fi
 
 
@@ -58,17 +60,6 @@ else
 	status "Skipped MAKEOPTS configuration (already defined in make.conf)"
 fi
 
-
-#if ! egrep "^\s*PORTAGE_BINHOST=" "${MAKE_CONF}" >/dev/null; then
-#	status "Configuring PORTAGE_BINHOST..."
-#	echo 'PORTAGE_BINHOST="http://packages.nextoo.org/nextoo-desktop/nextoo-kde/amd64"' >> "${MAKE_CONF}"
-#fi
-
-
-#if ! egrep "^\s*EMERGE_DEFAULT_OPTS=" "${MAKE_CONF}" >/dev/null; then
-#	status "Configuring EMERGE_DEFAULT_OPTS..."
-#	echo "EMERGE_DEFAULT_OPTS=\"--quiet --jobs=1\"" >> "${MAKE_CONF}"
-#fi
 
 # ONLY DO THIS ON A BUILD MACHINE, CLIENTS MUST STILL ACKNOWLEDGE AND ACCEPT LICENSES!
 if ! egrep "^\s*ACCEPT_LICENSE=" "${MAKE_CONF}" >/dev/null; then
@@ -108,42 +99,11 @@ else
 fi
 
 status "Adding Nextoo overlay..."
-run "${SCRIPT_DIR}/nextoo_repo_conf.sh"
-
-# status "Merging 'layman'..."
-# 	run emerge --noreplace --quiet app-portage/layman
-# 
-# 
-# status "Configuring layman..."
-# 	dest="http://www.nextoo.org/layman/repositories.xml"
-# 	if ! egrep 'http://www.nextoo.org/layman/repositories.xml$' /etc/layman/layman.cfg >/dev/null; then
-# 		#run sed -i "${arg}" /etc/layman/layman.cfg
-# 		run sed -i "/^\s*overlays\s*:/ a\\\\t${dest}" /etc/layman/layman.cfg
-# 	fi
-# 
-# 
-# status "Syncing layman..."
-# 	run layman --sync-all
-# 
-# 
-# if ! layman --list-local | egrep " * nextoo " >/dev/null; then
-# 	status "Adding Nextoo overlay..."
-# 	run layman --add nextoo
-# else
-# 	status "Skipping add Nextoo overlay (already added)"
-# fi
-
+	run "${SCRIPT_DIR}/nextoo_repo_conf.sh"
 
 # Temporary debug stuffs
 status "Printing emerge info..."
 	run emerge --info
-
-
-# status "Updating system make file..."
-# 	if ! egrep '^\s*source /var/lib/layman/make.conf$' "${MAKE_CONF}" >/dev/null; then
-# 		echo 'source /var/lib/layman/make.conf' >> "${MAKE_CONF}"
-# 	fi
-
 
 status "Setting profile to ${TARGET_PROFILE}..."
 	# Might want to check to see if the profile is already set. Use eselect profile show...
@@ -155,8 +115,8 @@ status "Environment setup complete"
 status "Printing emerge info..."
 	run emerge --info
 
-status "Merging Nextoo kernel..."
-	run emerge nextoo-kernel
+status "Merging Nextoo kernel (prerequisite for some packages)..."
+	run emerge -1Nu sys-kernel/nextoo-kernel
 
 status "Checking for profile-specific bootstrap.sh in /etc/portage/make.profile/..."
 	if [[ -x /etc/portage/make.profile/bootstrap.sh ]]; then
@@ -179,7 +139,7 @@ status "Emerge complete!"
 
 if [[ "${DEBUG}" != "true" ]]; then
 	status "Exiting chroot..."
-	exit
+	exit 0
 fi
 
 cd "${HOME}"
