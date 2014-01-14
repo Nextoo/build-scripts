@@ -31,7 +31,7 @@ fi
 
 # we need to have dev-vcs/git installed to clone and update the Nextoo repo
 echo "Merging dev-vcs/git..."
-USE="-* curl" emerge --noreplace dev-vcs/git
+USE="-* curl" emerge --noreplace --quiet dev-vcs/git
 
 # Store the Nextoo repo config info
 define NEXTOO_CONF <<EOL
