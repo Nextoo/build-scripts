@@ -75,6 +75,9 @@ while true; do
 	esac
 done
 
+# Enable debug output if requested
+[[ "${DEBUG}" == "true" ]] && set -x
+
 # Create a directory for development
 if [[ -z "${TARGET_DIR}" ]]; then
 	usage
@@ -89,3 +92,5 @@ while IFS= read -r -d '' x; do
 done < <(cat /proc/mounts | tac | awk -vORS=$'\\0' '{ print $2 }' | xargs -0 -L1 printf '%b\0' | egrep --text --null-data "^${TARGET_DIR}")
 
 status "Teardown complete"
+
+exit 0
