@@ -107,29 +107,31 @@ else
 	status "Not touching timezone"
 fi
 
+status "Adding Nextoo overlay..."
+run "${SCRIPT_DIR}/nextoo_repo_conf.sh"
 
-status "Merging 'layman'..."
-	run emerge --noreplace --quiet app-portage/layman
-
-
-status "Configuring layman..."
-	dest="http://www.nextoo.org/layman/repositories.xml"
-	if ! egrep 'http://www.nextoo.org/layman/repositories.xml$' /etc/layman/layman.cfg >/dev/null; then
-		#run sed -i "${arg}" /etc/layman/layman.cfg
-		run sed -i "/^\s*overlays\s*:/ a\\\\t${dest}" /etc/layman/layman.cfg
-	fi
-
-
-status "Syncing layman..."
-	run layman --sync-all
-
-
-if ! layman --list-local | egrep " * nextoo " >/dev/null; then
-	status "Adding Nextoo overlay..."
-	run layman --add nextoo
-else
-	status "Skipping add Nextoo overlay (already added)"
-fi
+# status "Merging 'layman'..."
+# 	run emerge --noreplace --quiet app-portage/layman
+# 
+# 
+# status "Configuring layman..."
+# 	dest="http://www.nextoo.org/layman/repositories.xml"
+# 	if ! egrep 'http://www.nextoo.org/layman/repositories.xml$' /etc/layman/layman.cfg >/dev/null; then
+# 		#run sed -i "${arg}" /etc/layman/layman.cfg
+# 		run sed -i "/^\s*overlays\s*:/ a\\\\t${dest}" /etc/layman/layman.cfg
+# 	fi
+# 
+# 
+# status "Syncing layman..."
+# 	run layman --sync-all
+# 
+# 
+# if ! layman --list-local | egrep " * nextoo " >/dev/null; then
+# 	status "Adding Nextoo overlay..."
+# 	run layman --add nextoo
+# else
+# 	status "Skipping add Nextoo overlay (already added)"
+# fi
 
 
 # Temporary debug stuffs
@@ -137,10 +139,10 @@ status "Printing emerge info..."
 	run emerge --info
 
 
-status "Updating system make file..."
-	if ! egrep '^\s*source /var/lib/layman/make.conf$' "${MAKE_CONF}" >/dev/null; then
-		echo 'source /var/lib/layman/make.conf' >> "${MAKE_CONF}"
-	fi
+# status "Updating system make file..."
+# 	if ! egrep '^\s*source /var/lib/layman/make.conf$' "${MAKE_CONF}" >/dev/null; then
+# 		echo 'source /var/lib/layman/make.conf' >> "${MAKE_CONF}"
+# 	fi
 
 
 status "Setting profile to ${TARGET_PROFILE}..."

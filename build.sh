@@ -7,7 +7,7 @@ MIRROR="http://gentoo.closest.myvwan.com/gentoo"
 # Internals
 ARCH=amd64
 #NEXTOO_BUILD=false
-SCRIPTS="chroot_bootstrap.sh update_use_flags.sh utils.sh"
+SCRIPTS="chroot_bootstrap.sh nextoo_repo_conf.sh update_use_flags.sh utils.sh"
 
 set -e
 
