@@ -29,6 +29,10 @@ if [[ "${EUID}" -ne '0' ]]; then
 	exit 1
 fi
 
+# we need to have dev-vcs/git installed to clone and update the Nextoo repo
+echo "Merging dev-vcs/git..."
+CURL_SSL="openssl" MAKEOPTS=-j10 USE="-* curl ipv6 ssl" emerge --noreplace --quiet dev-vcs/git
+
 # Store the Nextoo repo config info
 define NEXTOO_CONF <<EOL
 [nextoo]
@@ -59,10 +63,6 @@ else
 fi
 
 echo "Nextoo portage repository config in place, proceeding with installation..."
-
-# we need to have dev-vcs/git installed to clone and update the Nextoo repo
-echo "Merging git..."
-emerge --newuse --update dev-vcs/git
 
 # Create the Nextoo base directory if it doesn't exist
 [[ ! -d "${NEXTOO_PATH}" ]] && mkdir -p "${NEXTOO_PATH}"
