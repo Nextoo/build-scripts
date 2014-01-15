@@ -105,7 +105,8 @@ while true; do
 done
 
 
-
+# Enable debug output if requested
+[[ "${DEBUG}" == "true" ]] && set -x
 
 # Check for rootness
 ensure_root
@@ -171,7 +172,7 @@ status "Changing working directory back to '${OLD_PWD}'..."
 run cd "${OLD_PWD}"
 
 status 'Cleaning up and tearing down...'
-run "${SCRIPT_DIR}/teardown_env.sh" "${TARGET_DIR}"
+run env -i DEBUG="${DEBUG}" "${SCRIPT_DIR}/teardown_env.sh" "${TARGET_DIR}"
 
 status "Finished!"
 
