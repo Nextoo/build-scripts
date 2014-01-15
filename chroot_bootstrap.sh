@@ -135,9 +135,9 @@ status "Emerging world..."
 
 status "Emerge complete!"
 
-# Check some flag for pushing binaries to a depot
+# Check some flag for pushing binaries to a repo
 
-if [[ "${DEBUG}" != "true" ]]; then
+if [[ "${WANTSHELL}" != "true" ]]; then
 	status "Exiting chroot..."
 	exit 0
 fi

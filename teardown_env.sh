@@ -17,13 +17,11 @@ source "${SCRIPT_DIR}/utils.sh"
 function usage() {
 	echo -e "${RESET}${GREEN}${BOLD}Nextoo Environment Setup Script${RESET} ${BOLD}version <TAG ME>${RESET}"
 	cat <<-EOU
-		Usage:	$(basename "${0}") [long option(s)] [option(s)] ...
+		Usage:	$(basename "${0}") [long option(s)] [option(s)] <build_path>...
 
 		Options:
 		    -d, --debug		Enable debugging output
-		    -f, --force		Use the directory specified by -d even if it exists already
 		    -h, --help		Show this message and exit
-		    -t, --target	Path to directory containing environment to be torn down
 
 	EOU
 }
@@ -33,23 +31,18 @@ function usage() {
 ensure_root
 
 # Control params
-FORCE=false
 TARGET_DIR=
 
 # Get command-line options
-args=$(getopt --shell=bash --options="dfht:" --longoptions="debug,force,help,target:" --name="$(basename "${0}")" -- "$@")
+args=$(getopt --shell=bash --options="dh" --longoptions="debug,help" --name="$(basename "${0}")" -- "$@")
 if [[ "$?" -ne '0' ]]; then	error 'Terminating'; exit 1; fi
 eval set -- "${args}"
 
+state=options
 while true; do
 	case "$1" in
 		-d | --debug)
 			DEBUG=true
-			shift
-			;;
-
-		-f | --force)
-			FORCE=true
 			shift
 			;;
 
@@ -64,13 +57,26 @@ while true; do
 			;;
 
 		--)
+			state=target_dir
 			shift;
-			break;
 			;;
 
 		*)
-			usage
-			exit 1
+			case "${state}" in
+				target_dir)
+					TARGET_DIR="${1}"
+					state=too_many_params
+					;;
+
+				too_many_params)
+					# If there is no additional parameter, work is done
+					[[ -z "${1}" ]] && break
+					echo "Unrecognized parameter \"${1}\""
+					usage
+					exit 1
+					;;
+			esac
+			shift
 			;;
 	esac
 done

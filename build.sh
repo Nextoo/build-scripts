@@ -171,11 +171,7 @@ status "Changing working directory back to '${OLD_PWD}'..."
 run cd "${OLD_PWD}"
 
 status 'Cleaning up and tearing down...'
-if [[ "${DEBUG}" == 'true' ]]; then
-	run "${SCRIPT_DIR}/teardown_env.sh" --target="${TARGET_DIR}" --debug
-else
-	run "${SCRIPT_DIR}/teardown_env.sh" --target="${TARGET_DIR}"
-fi
+run "${SCRIPT_DIR}/teardown_env.sh" "${TARGET_DIR}"
 
 status "Finished!"
 
