@@ -75,7 +75,7 @@ while true; do
 			exit 0
 			;;
 			
-		-t | --timestamps
+		-t | --timestamps)
 			PRINT_DATE_TIMESTAMP=true
 			shift
 			;;
