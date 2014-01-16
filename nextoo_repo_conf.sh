@@ -25,12 +25,12 @@ set -e
 
 # are we running as root?
 if [[ "${EUID}" -ne '0' ]]; then
-	echo "You must be root to run this script" >&2
+	error "You must be root to run this script" >&2
 	exit 1
 fi
 
 # we need to have dev-vcs/git installed to clone and update the Nextoo repo
-echo "Merging dev-vcs/git..."
+status "Merging dev-vcs/git..."
 CURL_SSL="openssl" MAKEOPTS=-j10 USE="-* curl ipv6 ssl" emerge --noreplace --quiet dev-vcs/git
 
 # Store the Nextoo repo config info
@@ -41,7 +41,7 @@ define NEXTOO_CONF <<EOL
 	sync-uri = ${NEXTOO_PORTAGE_URI}
 EOL
 
-echo "Adding configuration for Nextoo portage repository..."
+status "Adding configuration for Nextoo portage repository..."
 if [[ -d "${REPOS_CONF}" ]]; then
 	# REPOS_CONF is a directory, so check for a file containing the Nextoo repo
 	if ! egrep '^\[nextoo\]$' "${REPOS_CONF}"/* >/dev/null; then
@@ -57,18 +57,18 @@ elif [[ -f "${REPOS_CONF}" ]]; then
 	fi
 else
 	# No file or directory for repos.conf so create it (or maybe it was something silly like a device node)
-	mkdir -p "${REPOS_CONF}"
+	run mkdir -p "${REPOS_CONF}"
 	set -o noclobber
 	echo "${NEXTOO_CONF}" > "${REPOS_CONF}"/nextoo.conf
 fi
 
-echo "Nextoo portage repository config in place, proceeding with installation..."
+status "Nextoo portage repository config in place, proceeding with installation..."
 
 # Create the Nextoo base directory if it doesn't exist
-[[ ! -d "${NEXTOO_PATH}" ]] && mkdir -p "${NEXTOO_PATH}"
+[[ ! -d "${NEXTOO_PATH}" ]] && run mkdir -p "${NEXTOO_PATH}"
 
 # Clone the Nextoo portage repository the first time if needed
 if [[ ! -d "${NEXTOO_PATH}"/portage ]]; then
 	cd "${NEXTOO_PATH}"
-	git clone "${NEXTOO_PORTAGE_URI}" portage
+	run git clone "${NEXTOO_PORTAGE_URI}" portage
 fi

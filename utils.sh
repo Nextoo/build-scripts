@@ -16,7 +16,14 @@ function debug() {
 }
 
 function finish() {
-	[[ "$?" -ne '0' ]] && error "Unsuccessful completion, you may need to clean up now..."
+	local x=$?
+	if [[ "$x" -ne '0' ]]; then
+		error "Unsuccessful completion, you may need to clean up now..."
+	else
+		status "Completed successfully"
+	fi
+	
+	return $x
 }
 
 function error() {

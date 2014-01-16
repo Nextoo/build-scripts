@@ -51,11 +51,6 @@ while true; do
 			exit 0
 			;;
 
-		-t | --target)
-			TARGET_DIR="${2}"
-			shift 2
-			;;
-
 		--)
 			state=target_dir
 			shift;
