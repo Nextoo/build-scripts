@@ -35,6 +35,7 @@ function usage() {
 		    -d, --debug		Enable debugging output
 		    -f, --force		Use the directory specified by -d even if it exists already
 		    -h, --help		Show this message and exit
+		    -t, --timestamps	Enable timestamps in debug and status output
 
 		An (empty) directory must always be specified as the build path. If not empty, the -f option
 		must be present and may lead to unpredictable results.
@@ -46,7 +47,7 @@ function usage() {
 
 
 # Get command-line options
-args=$(getopt --shell=bash --options="bdfh" --longoptions="build,debug,force,help" --name="$(basename "${0}")" -- "$@")
+args=$(getopt --shell=bash --options="bdfht" --longoptions="build,debug,force,help,timestamps" --name="$(basename "${0}")" -- "$@")
 if [[ "$?" -ne '0' ]]; then	error 'Terminating'; exit 1; fi
 eval set -- "${args}"
 
@@ -72,6 +73,11 @@ while true; do
 		-h | --help)
 			usage
 			exit 0
+			;;
+			
+		-t | --timestamps
+			PRINT_DATE_TIMESTAMP=true
+			shift
 			;;
 
 		--)
