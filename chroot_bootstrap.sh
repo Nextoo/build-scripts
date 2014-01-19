@@ -105,9 +105,9 @@ status "Adding Nextoo overlay..."
 status "Printing emerge info..."
 	run emerge --info
 
-status "Setting profile to ${TARGET_PROFILE}..."
+status "Setting profile to Nextoo ${TARGET_PROFILE} (${ARCH})..."
 	# Might want to check to see if the profile is already set. Use eselect profile show...
-	eselect profile set ${TARGET_PROFILE}
+	eselect profile set nextoo:0.0.1/default/linux/${ARCH}/${TARGET_PROFILE}
 
 status "Environment setup complete"
 

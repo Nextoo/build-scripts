@@ -235,7 +235,7 @@ run mount --rbind /dev dev/
 run mount --rbind /sys sys/
 
 status 'Chrooting...'
-run env -i TERM="${TERM}" HOME=/root NEXTOO_BUILD="${NEXTOO_BUILD}" DEBUG="${DEBUG}" TARGET_PROFILE="${TARGET_PROFILE}" chroot "${TARGET_DIR}" /bin/bash --rcfile /root/nextoo_scripts/chroot_bootstrap.sh -i
+run env -i TERM="${TERM}" HOME=/root ARCH="${ARCH}" NEXTOO_BUILD="${NEXTOO_BUILD}" DEBUG="${DEBUG}" TARGET_PROFILE="${TARGET_PROFILE}" chroot "${TARGET_DIR}" /bin/bash --rcfile /root/nextoo_scripts/chroot_bootstrap.sh -i
 
 status "Changing working directory back to '${OLD_PWD}'..."
 run cd "${OLD_PWD}"
