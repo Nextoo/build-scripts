@@ -118,20 +118,26 @@ done
 # Enable debug output if requested
 [[ "${DEBUG}" == "true" ]] && set -x
 
-# Check for rootness
-ensure_root
 
-
-
-
-
-# Create a directory for development
+# Validate command-line argument for directory
 if [[ -z "${TARGET_DIR}" ]]; then
 	usage
 	error 'Error: Target directory not specified.'
 	exit 1
 fi
 
+# Validate command-line argument for profile
+if [[ -z "${TARGET_PROFILE}" ]]; then
+	usage
+	error 'Error: Target profile not specified.'
+	exit 1
+fi
+
+# Check for rootness
+ensure_root
+
+
+# Verify the target directory does not exist
 if [[ -d "${TARGET_DIR}" ]]; then
 	if [[ "${FORCE}" != 'true' ]]; then
 		error "Error: Directory '${TARGET_DIR}' exists, and -f not specified. Remove and try again."
@@ -139,15 +145,10 @@ if [[ -d "${TARGET_DIR}" ]]; then
 	fi
 fi
 
+# Create a directory for development
 if [[ ! -d "${TARGET_DIR}" ]]; then
 	status "Creating directory '${TARGET_DIR}'..."
 	run mkdir -p "${TARGET_DIR}"
-fi
-
-if [[ -z "${TARGET_PROFILE}" ]]; then
-	usage
-	error 'Error: Target profile not specified.'
-	exit 1
 fi
 
 
