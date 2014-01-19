@@ -1,12 +1,7 @@
 #!/bin/bash
 # Creates a directory in the current directory and performs the setup required for development of Nextoo
 
-CURRENT_STAGE3="20131226"
-MIRROR="http://gentoo.closest.myvwan.com/gentoo"
-
 # Internals
-ARCH=amd64
-#NEXTOO_BUILD=false
 SCRIPTS="chroot_bootstrap.sh nextoo_repo_conf.sh update_use_flags.sh utils.sh"
 
 # Exit immediately on failure
@@ -25,35 +20,76 @@ source "${SCRIPT_DIR}/utils.sh"
 trap finish EXIT
 
 
+function get_arch() {
+	local arch=$(uname -m)
+	arch=${arch/x86_64/amd64}
+	echo $arch
+}
+
+function get_latest_stage_tarball_filename() {
+	data=$(wget -nv -O- "${MIRROR}/releases/${ARCH}/autobuilds/latest-stage3.txt" | grep -v "hardened" | grep -v "nomultilib" | grep "stage3-amd64-" )
+	if [[ "$?" -ne '0' ]]; then
+		error "Error determining latest stage3 tarball filename"
+		exit 1
+	fi
+	
+	echo $data
+}
+
 function usage() {
 	echo -e "${RESET}${GREEN}${BOLD}Nextoo Build Script${RESET} ${BOLD}version <TAG ME>${RESET}"
 	cat <<-EOU
 		Usage:	$(basename "${0}") [long option(s)] [option(s)] <build path> <profile>
 
 		Options:
+		    -a, --arch		Architecture to build (defaults to the output of 'uname -m')
 		    -b, --build		Configure environment for building binaries (not needed for user systems)
 		    -d, --debug		Enable debugging output
 		    -f, --force		Use the directory specified by -d even if it exists already
 		    -h, --help		Show this message and exit
+		    -m, --mirror	Specify the mirror for getting Gentoo sources (default: distfiles.gentoo.org)
 		    -t, --timestamps	Enable timestamps in debug and status output
+		
+		Arch:
+		    Currently we support 'x86' and 'amd64'. If you don't know, don't worry - auto detection
+		    usually works :)
 
-		An (empty) directory must always be specified as the build path. If not empty, the -f option
-		must be present and may lead to unpredictable results.
+		Build path:
+		    An (empty) directory must always be specified as the build path. If not empty, the -f option
+		    must be present and may lead to unpredictable results.
 
-		The profile is specified as in "nextoo:0.0.1/default/linux/amd64/server/router".
+		Profile:
+		    Full Nextoo profile names look like "nextoo:default/linux/amd64/server/router".
+		    Because that's a pain to type, you only need to provide the elements which come after the
+		    architecture. For the amd64 router profile, you'd specify "server/router".
 
 	EOU
 }
 
+# Assign defaults
+ARCH="$(get_arch)"
+MIRROR="http://distfiles.gentoo.org"
+
 
 # Get command-line options
-args=$(getopt --shell=bash --options="bdfht" --longoptions="build,debug,force,help,timestamps" --name="$(basename "${0}")" -- "$@")
-if [[ "$?" -ne '0' ]]; then	error 'Terminating'; exit 1; fi
+set +e
+args=$(getopt --shell=bash --options="abdfhmt" --longoptions="arch:,build,debug,force,help,mirror:,timestamps" --name="$(basename "${0}")" -- "$@")
+if [[ "$?" -ne '0' ]]; then
+	usage
+	exit 1 
+fi
+set -e
 eval set -- "${args}"
 
 state=options
 while [[ ! -z "${1}" ]]; do
 	case "${1}" in
+		-a | --arch)
+			shift
+			ARCH=$1
+			shift
+			;;
+
 		-b | --build)
 			NEXTOO_BUILD=true
 			shift
@@ -72,6 +108,12 @@ while [[ ! -z "${1}" ]]; do
 		-h | --help)
 			usage
 			exit 0
+			;;
+			
+		-m | --mirror)
+			shift
+			MIRROR=$1
+			shift
 			;;
 			
 		-t | --timestamps)
@@ -160,14 +202,20 @@ status "Changing working directory to '${TARGET_DIR}'..."
 OLD_PWD=$(pwd)
 run cd "${TARGET_DIR}"
 
+
+status "Determining the latest Gentoo Stage 3 tarball..."
+TARBALL=$(get_latest_stage_tarball_filename)
+debug "Using tarball '${TARBALL}'"
+
 status 'Downloading the latest Gentoo Stage 3 tarball...'
-run wget -nv "${MIRROR}/releases/${ARCH}/current-stage3/stage3-${ARCH}-${CURRENT_STAGE3}.tar.bz2"
+run wget -nv "${MIRROR}/releases/${ARCH}/autobuilds/${TARBALL}"
 
 status 'Downloading the latest Portage tree...'
 run wget -nv "${MIRROR}/snapshots/portage-latest.tar.bz2"
 
 status 'Unpacking Gentoo Stage 3 tarball...'
-run tar -xpf stage3-${ARCH}-${CURRENT_STAGE3}.tar.bz2
+# BUG BUG BUG This should uset he actual filename we downloaded...
+run tar -xpf stage3-*.tar.bz2
 
 status 'Unpacking Portage tree...'
 run tar -xf portage-latest.tar.bz2 -C usr/
