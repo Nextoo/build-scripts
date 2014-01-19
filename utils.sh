@@ -11,13 +11,13 @@ set -e
 
 function getDateTimestamp() {
 	if [[ "${PRINT_DATE_TIMESTAMP}" == 'true' ]]; then
-		echo "$(date +%Y-%m-%d\ %H:%M:%S)"
+		echo "$(date +%Y-%m-%d\ %H:%M:%S) "
 	fi
 }
 
 function debug() {
 	if [[ "${DEBUG}" == 'true' ]]; then
-		echo -e "${RESET}$(getDateTimestamp) ${BOLD}${YELLOW}${*}${RESET}"
+		echo -e "${RESET}$(getDateTimestamp)${BOLD}${YELLOW}${*}${RESET}"
 	fi
 }
 
@@ -33,7 +33,7 @@ function finish() {
 }
 
 function error() {
-	echo -e "${RESET}$(getDateTimestamp) ${RED}${BOLD}${*}${RESET}" >&2
+	echo -e "${RESET}$(getDateTimestamp)${RED}${BOLD}${*}${RESET}" >&2
 }
 
 function run() {
@@ -50,7 +50,7 @@ function run() {
 }
 
 function status() {
-	echo -e "${RESET}$(getDateTimestamp) ${BOLD}${*}${RESET}"
+	echo -e "${RESET}$(getDateTimestamp)${BOLD}${*}${RESET}"
 }
 
 function ensure_root() {

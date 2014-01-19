@@ -52,9 +52,8 @@ if [[ "$?" -ne '0' ]]; then	error 'Terminating'; exit 1; fi
 eval set -- "${args}"
 
 state=options
-
-while true; do
-	case "$1" in
+while [[ ! -z "${1}" ]]; do
+	case "${1}" in
 		-b | --build)
 			NEXTOO_BUILD=true
 			shift
@@ -99,9 +98,14 @@ while true; do
 
 				too_many_params)
 					# If there is no additional parameter, work is done
-					[[ -z "${1}" ]] && break
-					echo "Unrecognized parameter \"${1}\""
+					#[[ -z "${1}" ]] && break
+					error "Unrecognized parameter \"${1}\""
 					usage
+					exit 1
+					;;
+				
+				*)
+					error "Unknown state \"${state}\" during parameter processing"
 					exit 1
 					;;
 			esac
@@ -135,12 +139,22 @@ if [[ -d "${TARGET_DIR}" ]]; then
 	fi
 fi
 
-
 if [[ ! -d "${TARGET_DIR}" ]]; then
 	status "Creating directory '${TARGET_DIR}'..."
 	run mkdir -p "${TARGET_DIR}"
 fi
 
+if [[ -z "${TARGET_PROFILE}" ]]; then
+	usage
+	error 'Error: Target profile not specified.'
+	exit 1
+fi
+
+
+
+
+
+# Begin installation
 status "Changing working directory to '${TARGET_DIR}'..."
 OLD_PWD=$(pwd)
 run cd "${TARGET_DIR}"
