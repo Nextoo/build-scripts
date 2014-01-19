@@ -215,7 +215,7 @@ run wget -nv "${MIRROR}/snapshots/portage-latest.tar.bz2"
 
 status 'Unpacking Gentoo Stage 3 tarball...'
 # BUG BUG BUG This should uset he actual filename we downloaded...
-run tar -xpf stage3-*.tar.bz2
+run tar -xpf ${TARBALL##*/}
 
 status 'Unpacking Portage tree...'
 run tar -xf portage-latest.tar.bz2 -C usr/
