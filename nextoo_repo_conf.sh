@@ -36,9 +36,9 @@ CURL_SSL="openssl" MAKEOPTS=-j10 USE="-* curl ipv6 ssl" emerge --noreplace --qui
 # Store the Nextoo repo config info
 define NEXTOO_CONF <<EOL
 [nextoo]
-	location = $NEXTOO_PATH/portage
-	sync-type = git
-	sync-uri = ${NEXTOO_PORTAGE_URI}
+location = $NEXTOO_PATH/portage
+sync-type = git
+sync-uri = ${NEXTOO_PORTAGE_URI}
 EOL
 
 status "Adding configuration for Nextoo portage repository..."
