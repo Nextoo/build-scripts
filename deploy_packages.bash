@@ -181,11 +181,11 @@ function copy_packages_to_target() {
 
 
 function merge_manifest_files() {
-	local a="${1}"
-	local b="${2}"
-	local out="${3}"
+	local base_manifest="${1}"
+	local new_manifest="${2}"
+	local merged_manifest="${3}"
 
-	
+	./manifest_merge.rb "${base_manifest}" "${new_manifest}" "${merged_manifest}"
 }
 
 function merge_manifests() {
@@ -196,21 +196,27 @@ function merge_manifests() {
 	#	- make backup of target's manifests
 	#	- publish new manifests
 
-	local REMOTE_MANIFEST="${TARGET_DIR}/Packages"
-	local input_manifest="/tmp/Packages.in.$$"
+	# TODO
+	#	- get the WEBSERVER_PATH
+	local remote_manifest="${WEBSERVER_PATH}/Packages"
+	local base_manifest="/tmp/Packages.base.$$"
+	local built_manifest="${SOURCE_DIR}/Packages"
 	local output_manifest="/tmp/Packages.out.$$"
 	
+	# If the remote has a manifest, then we need to get a copy to merge with. Otherwise, we'll just copy the new manifest over
+	if [[ -f "${remote_manifest}" ]]; then
+		debug 'Fetching remote manifest from "${remote_manifest}"...'
+		
+		rsync "${remote_manifest}" "${base_manifest}"
+	fi
 	
-	debug 'Fetching remote manifest from "${REMOTE_MANIFEST}"...'
+	merge_manifest_files "${base_manifest}" "${built_manifest}" "${output_manifest}"
 	
-	rsync "${REMOTE_MANIFEST}" "${input_manifest}"
-	merge_manifest_Files "${SOURCE_DIR}/Packages" "/tmp/Packages.in.$$" "${output_manifest}"
+	# TODO
+	#	- publish the output_manifest
+	#	- update the URI in the top level Packages file
+	
 }
-
-# General flow:
-#	- validate source, target, credentials, etc
-#	- copy the packages over
-#	- merge manifests
 
 validate_packages_source_dir
 copy_packages_to_target

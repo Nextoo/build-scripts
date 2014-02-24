@@ -66,7 +66,7 @@ class TestManifestMerge < Minitest::Test
 			SIZE: 7336
 			END
 		
-		@app_admin_eselect_fontconfig_name = "CPV: app-admin/eselect-fontconfig-1.1"
+		@app_admin_eselect_fontconfig_name = "app-admin/eselect-fontconfig-1.1"
 		
 		@app_admin_eselect_lib_bin_symlink_string = <<-END.gsub(/^\t{3}/, '').strip
 			BUILD_TIME: 1389616920
@@ -83,7 +83,7 @@ class TestManifestMerge < Minitest::Test
 			SIZE: 29258
 			END
 		
-		@app_admin_eselect_lib_bin_symlink_name = "CPV: app-admin/eselect-lib-bin-symlink-0.1.1"
+		@app_admin_eselect_lib_bin_symlink_name = "app-admin/eselect-lib-bin-symlink-0.1.1"
 		
 		@app_admin_eselect_mesa_string = <<-END.gsub(/^\t{3}/, '').strip
 			BUILD_TIME: 1382861499
@@ -164,8 +164,9 @@ class TestManifestMerge < Minitest::Test
 	def test_that_file_contents_can_be_parsed_into_packages_hash
 		man = Manifest.new @mini_manifest
 		
-		#need to test the rest of the packages that got included
 		assert_equal @app_admin_eselect_blas_string, man.packages[@app_admin_eselect_blas_name].to_s()
+		assert_equal @app_admin_eselect_fontconfig_string, man.packages[@app_admin_eselect_fontconfig_name].to_s()
+		assert_equal @app_admin_eselect_lib_bin_symlink_string, man.packages[@app_admin_eselect_lib_bin_symlink_name].to_s()
 	end
 	
 	def test_that_a_manifest_can_be_return_string

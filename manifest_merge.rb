@@ -57,8 +57,8 @@ class Manifest
 		return content
 	end
 	
-	def merge_in(man_b)
-		@packages.merge!(man_b.packages)
+	def merge_in(new_manifest_content)
+		@packages.merge!(new_manifest_content.packages)
 	end
 end
 
@@ -69,30 +69,26 @@ def main
 	end
 	
 	# Read in arguments
-	file_a, file_b, output = ARGV[0], ARGV[1], ARGV[2]
+	published_manifest_file, built_manifest_path, merged_manifest_file = ARGV[0], ARGV[1], ARGV[2]
 	
-	puts file_a
-	puts file_b
-	puts output
+	puts "Path to freshly built manifest:\t" + built_manifest_path
+	puts "Path to currently published manifest:\t" + published_manifest_file
+	puts "Path to store merged manifest:\t" + merged_manifest_file
 	
-	man_a = Manifest.new File.read(file_a)
+	built_manifest_content = Manifest.new File.read(built_manifest_path)
 	
-	if File.exist?(file_b)
-		man_b = Manifest.new File.read(file_b)
+	if File.exist?(published_manifest_file)
+		published_manifest_content = Manifest.new File.read(published_manifest_file)
 	end
-	
-	puts "\nManifest A:"
-	puts man_a.to_s()
-	
-	puts "\nManifest B:"
 	
 	# If there is not a current Manifest on the webserver, just copy the new Manifest over
-	unless man_b.nil?
-		puts man_b.to_s()
-		man_a.merge_in(man_b)
+	unless published_manifest_content.nil?
+		published_manifest_content.merge_in(built_manifest_content)
+	else
+		published_manifest_content = built_manifest_content
 	end
 	
-	File.write(output, man_a.to_s())
+	File.write(merged_manifest_file, published_manifest_content.to_s())
 	
 end
 
