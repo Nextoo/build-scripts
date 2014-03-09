@@ -115,8 +115,9 @@ status "Environment setup complete"
 status "Printing emerge info..."
 	run emerge --info
 
-status "Merging Nextoo kernel (prerequisite for some packages)..."
-	run emerge -1Nu sys-kernel/nextoo-kernel
+# Nope. Not anymore.
+#status "Merging Nextoo kernel (prerequisite for some packages)..."
+#	run emerge -1Nu sys-kernel/nextoo-kernel
 
 status "Checking for profile-specific bootstrap.sh in /etc/portage/make.profile/..."
 	if [[ -x /etc/portage/make.profile/bootstrap.sh ]]; then
