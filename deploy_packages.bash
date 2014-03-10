@@ -13,9 +13,9 @@ source "${SCRIPT_DIR}/utils.sh"
 
 
 function usage() {
-	echo -e "${RESET}${GREEN}${BOLD}Nextoo Build Script${RESET} ${BOLD}version <TAG ME>${RESET}"
+	echo -e "${RESET}${GREEN}${BOLD}Nextoo Deploy Packages Script${RESET} ${BOLD}version <TAG ME>${RESET}"
 	cat <<-EOU
-		Usage:	$(basename "${0}") [long option(s)] [option(s)] <source path> <destination path>
+		Usage:	$(basename "${0}") [long option(s)] [option(s)] <base manifest path> <delta manifest path> <output manifest path>
 
 		Options:
 		    -a, --arch		Architecture to build (defaults to the output of 'uname -m')
@@ -97,19 +97,24 @@ while [[ ! -z "${1}" ]]; do
 			;;
 
 		--)
-			state=source_dir
+			state=base_dir
 			shift
 			;;
 
 		*)
 			case "${state}" in
-				source_dir)
-					SOURCE_DIR="${1}"
-					state=target_dir
+				base_dir)
+					BASE_DIR="${1}"
+					state=delta_dir
 					;;
 
-				target_dir)
-					TARGET_DIR="${1}"
+				delta_dir)
+					DELTA_DIR="${1}"
+					state=output_dir
+					;;
+					
+				output_dir)
+					OUTPUT_DIR="${1}"
 					state=too_many_params
 					;;
 
@@ -135,57 +140,101 @@ done
 [[ "${DEBUG}" == "true" ]] && set -x
 
 
-# Validate command-line argument for directory
-if [[ -z "${SOURCE_DIR}" ]]; then
+# Validate command-line argument
+if [[ -z "${BASE_DIR}" ]]; then
 	usage
-	error 'Error: Target directory not specified.'
+	error 'Error: Base manifest directory is undefined.'
 	exit 1
 fi
 
-# Validate source dir exists
-if [[ ! -d "${SOURCE_DIR}" ]]; then
+# Validate command-line argument
+if [[ -z "${DELTA_DIR}" ]]; then
 	usage
-	error 'Error: <source path> was not a valid directory or does not exist.'
+	error 'Error: Delta manifest directory is undefined.'
 	exit 1
 fi
 
-# Validate command-line argument for profile
-if [[ -z "${TARGET_DIR}" ]]; then
+# Verify Delta manifest directory exists
+if [[ -d "${DELTA_DIR}" ]]; then
+	debug 'Delta directory does not exist.'
+fi
+
+# Validate command-line argument
+if [[ -z "${OUTPUT_DIR}" ]]; then
 	usage
-	error 'Error: Target profile not specified.'
+	error 'Error: Outpout manifest directory is undefined.'
 	exit 1
 fi
 
-# Verify the target directory does not exist
-if [[ -d "${TARGET_DIR}" ]]; then
-	debug 'Target directory exists and a merge will be performed'
-fi
-
-# Create a directory for development
-if [[ ! -d "${TARGET_DIR}" ]]; then
-	status "Creating directory '${TARGET_DIR}'..."
-	run mkdir -p "${TARGET_DIR}"
-fi
 
 function validate_packages_source_dir() {
-	if [[ ! -f "${SOURCE_DIR}/Packages" ]]; then
-		error 'A Packages manifest/index file is not in the source directory provided. Assuming wrong source dir and exiting!'
+	if [[ ! -f "${DELTA_DIR}/Packages" ]]; then
+		error 'A Packages manifest/index file, that Portage cares about, is not in the source directory provided. Assuming wrong delta manifest dir and exiting!'
+		exit 1
+	fi
+	
+	if [[ ! -f "${DELTA_DIR}/packages/Packages" ]]; then
+		error 'A Packages manifest/index file, that Portage does not care about, is not in the source directory provided. Assuming wrong delta manifest dir and exiting!'
 		exit 1
 	fi
 }
 
 function copy_packages_to_target() {
-	status "Coping packages from ${SOURCE_DIR} to ${TARGET_DIR} ..."
-	rsync -urv --exclude="/Packages" "${SOURCE_DIR}"/* "${TARGET_DIR}"
+	status "Coping packages from ${DELTA_DIR} to ${OUTPUT_DIR} ..."
+	rsync -urv --exclude="/Packages" "${DELTA_DIR}"/* "${OUTPUT_DIR}"
 }
 
 
 function merge_manifest_files() {
-	local base_manifest="${1}"
-	local new_manifest="${2}"
-	local merged_manifest="${3}"
+	local remote_manifest="${BASE_DIR}/packages/Packages"
+	local base_manifest="/tmp/Packages.base.$$"
+	local built_manifest="${DELTA_DIR}/packages/Packages"
+	local output_manifest="/tmp/Packages.out.$$"
+	
+	debug 'Fetching remote manifest from "${remote_manifest}"...'
+	rsync "${remote_manifest}" "${base_manifest}"
+	
+	if [[ $? != 0 ]]; then
+		error 'Failed to fetch the remote manifest from "${remote_manifest}"'
+		exit 1
+	fi
 
-	./manifest_merge.rb "${base_manifest}" "${new_manifest}" "${merged_manifest}"
+	./manifest_merge.rb "${base_manifest}" "${built_manifest}" "${output_manifest}"
+	
+	if [[ $? != 0 ]]; then
+		error 'Failed to merge the manifest files.'
+		exit 1
+	fi
+	
+	debug 'Publishing merged manifest to "${remote_manifest}"...'
+	rsync "${output_manifest}" "${remote_manifest}"
+	
+	if [[ $? != 0 ]]; then
+		error 'Failed to publish the merged manifest from "${remote_manifest}"'
+		exit 1
+	fi
+}
+
+function update_top_manifest_uri() {
+	local remote_manifest="${BASE_DIR}/Packages"
+	local base_manifest="/tmp/TopPackages.base.$$"
+	local built_manifest="${DELTA_DIR}/Packages"
+	local output_manifest="/tmp/TopPackages.out.$$"
+	
+	debug 'Fetching remote manifest from "${remote_manifest}"...'
+	rsync "${remote_manifest}" "${base_manifest}"
+	
+	if [[ $? != 0 ]]; then
+		error 'Failed to fetch the remote manifest from "${remote_manifest}"'
+		exit 1
+	fi
+
+	./update_header.rb "${base_manifest}" "${built_manifest}" "${output_manifest}"
+	
+	if [[ $? != 0 ]]; then
+		error 'Failed to merge the manifest files.'
+		exit 1
+	fi
 }
 
 function merge_manifests() {
@@ -197,25 +246,10 @@ function merge_manifests() {
 	#	- publish new manifests
 
 	# TODO
-	#	- get the WEBSERVER_PATH
-	local remote_manifest="${WEBSERVER_PATH}/Packages"
-	local base_manifest="/tmp/Packages.base.$$"
-	local built_manifest="${SOURCE_DIR}/Packages"
-	local output_manifest="/tmp/Packages.out.$$"
+	# These functions are not fully working yet
+	merge_manifest_files
 	
-	# If the remote has a manifest, then we need to get a copy to merge with. Otherwise, we'll just copy the new manifest over
-	if [[ -f "${remote_manifest}" ]]; then
-		debug 'Fetching remote manifest from "${remote_manifest}"...'
-		
-		rsync "${remote_manifest}" "${base_manifest}"
-	fi
-	
-	merge_manifest_files "${base_manifest}" "${built_manifest}" "${output_manifest}"
-	
-	# TODO
-	#	- publish the output_manifest
-	#	- update the URI in the top level Packages file
-	
+	update_top_manifest_uri
 }
 
 validate_packages_source_dir
