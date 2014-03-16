@@ -5,7 +5,7 @@ SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
 	SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
 	SOURCE="$(readlink "$SOURCE")"
-	[[ $SOURCE != /* ]] && SOURCE="$SCRIPT_DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+	[[ ${SOURCE} != /* ]] && SOURCE="$SCRIPT_DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
 done
 SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
 
@@ -15,7 +15,7 @@ source "${SCRIPT_DIR}/utils.sh"
 function usage() {
 	echo -e "${RESET}${GREEN}${BOLD}Nextoo Deploy Packages Script${RESET} ${BOLD}version <TAG ME>${RESET}"
 	cat <<-EOU
-		Usage:	$(basename "${0}") [long option(s)] [option(s)] <base manifest path> <delta manifest path> <output manifest path>
+		Usage:	$(basename "${0}") [long option(s)] [option(s)] <base manifest path> <delta manifest path> <output manifest path> <top packages uri>
 
 		Options:
 		    -a, --arch		Architecture to build (defaults to the output of 'uname -m')
@@ -105,16 +105,24 @@ while [[ ! -z "${1}" ]]; do
 			case "${state}" in
 				base_dir)
 					BASE_DIR="${1}"
+					debug "BASE_DIR set to '${BASE_DIR}'"
 					state=delta_dir
 					;;
 
 				delta_dir)
 					DELTA_DIR="${1}"
+					debug "DELTA_DIR set to '${DELTA_DIR}'"
 					state=output_dir
 					;;
 					
 				output_dir)
 					OUTPUT_DIR="${1}"
+					debug "OUTPUT_DIR set to '${OUTPUT_DIR}'"
+					state=packages_uri
+					;;
+
+				packages_uri)
+					PACKAGES_URI="${1}"
 					state=too_many_params
 					;;
 
@@ -166,6 +174,12 @@ if [[ -z "${OUTPUT_DIR}" ]]; then
 	exit 1
 fi
 
+# Validate command-line argument
+if [[ -z "${PACKAGES_URI}" ]]; then
+	usage
+	error 'Error: Packages URI was not provided'
+	exit 1
+fi
 
 function validate_packages_source_dir() {
 	if [[ ! -f "${DELTA_DIR}/Packages" ]]; then
@@ -186,50 +200,32 @@ function copy_packages_to_target() {
 
 
 function merge_manifest_files() {
-	local remote_manifest="${BASE_DIR}/packages/Packages"
-	local base_manifest="/tmp/Packages.base.$$"
-	local built_manifest="${DELTA_DIR}/packages/Packages"
-	local output_manifest="/tmp/Packages.out.$$"
-	
-	debug 'Fetching remote manifest from "${remote_manifest}"...'
-	rsync "${remote_manifest}" "${base_manifest}"
-	
-	if [[ $? != 0 ]]; then
-		error 'Failed to fetch the remote manifest from "${remote_manifest}"'
-		exit 1
-	fi
+	# $1 - base manifest
+	# $2 - built manifest
+	# $3 - output manifest
 
-	./manifest_merge.rb "${base_manifest}" "${built_manifest}" "${output_manifest}"
+	./manifest_merge.rb "${1}" "${2}" "${3}"
 	
 	if [[ $? != 0 ]]; then
 		error 'Failed to merge the manifest files.'
 		exit 1
 	fi
 	
-	debug 'Publishing merged manifest to "${remote_manifest}"...'
+	debug "Publishing merged manifest to '${remote_manifest}'..."
 	rsync "${output_manifest}" "${remote_manifest}"
 	
 	if [[ $? != 0 ]]; then
-		error 'Failed to publish the merged manifest from "${remote_manifest}"'
+		error "Failed to publish the merged manifest from '${remote_manifest}'"
 		exit 1
 	fi
 }
 
 function update_top_manifest_uri() {
-	local remote_manifest="${BASE_DIR}/Packages"
-	local base_manifest="/tmp/TopPackages.base.$$"
-	local built_manifest="${DELTA_DIR}/Packages"
-	local output_manifest="/tmp/TopPackages.out.$$"
-	
-	debug 'Fetching remote manifest from "${remote_manifest}"...'
-	rsync "${remote_manifest}" "${base_manifest}"
-	
-	if [[ $? != 0 ]]; then
-		error 'Failed to fetch the remote manifest from "${remote_manifest}"'
-		exit 1
-	fi
+	# $1 - input file
+	# $2 - output file
+	# $3 - uri
 
-	./update_header.rb "${base_manifest}" "${built_manifest}" "${output_manifest}"
+	./update_header.rb "${1}" "${2}" "${3}"
 	
 	if [[ $? != 0 ]]; then
 		error 'Failed to merge the manifest files.'
@@ -238,6 +234,9 @@ function update_top_manifest_uri() {
 }
 
 function merge_manifests() {
+	# $1 - remote path
+	# $1 - output package manifest
+	# $2 - output manifest with URI
 
 	# flow:
 	#	- pull remote manifest
@@ -245,17 +244,63 @@ function merge_manifests() {
 	#	- make backup of target's manifests
 	#	- publish new manifests
 
-	# TODO
-	# These functions are not fully working yet
-	merge_manifest_files
+	local remote_manifest="${1}/packages/Packages"
+	local base_manifest="/tmp/Packages.base.$$" #the remote manifest will be stored here and treated as the base
+	local built_manifest="${DELTA_DIR}/Packages"
+
+	debug "Fetching remote manifest from '${remote_manifest}'..."
+	rsync "${remote_manifest}" "${base_manifest}"
+
+	if [[ $? != 0 ]]; then
+		error "Failed to fetch the remote manifest from '${remote_manifest}'"
+		exit 1
+	fi
+
+	merge_manifest_files "${base_manifest}" "${built_manifest}" "${2}"
 	
-	update_top_manifest_uri
+	update_top_manifest_uri "${2}" "${3}" "${PACKAGES_URI}"
 }
 
-validate_packages_source_dir
-copy_packages_to_target
-merge_manifests
+function publish_new_manifests() {
+	# $1 - remote path
+	# $2 - output package manifest
+	# $3 - output manifest with URI
 
+	local remote_packages_manifest="${1}/packages/Packages"
+	local remote_manifest_uri="${1}/Packages"
+
+	debug "Pushing package manifest to remote: '${remote_packages_manifest}'..."
+	rsync "${2}" "${remote_packages_manifest}"
+
+	if [[ $? != 0 ]]; then
+		error "Failed to push manifest to remote: '${remote_packages_manifest}'"
+		exit 1
+	fi
+
+	debug "Pushing package manifest with URI to remote: '${remote_manifest_uri}'..."
+	rsync "${3}" "${remote_manifest_uri}"
+
+	if [[ $? != 0 ]]; then
+		error "Failed to push manifest to remote: '${remote_manifest_uri}'"
+		exit 1
+	fi
+
+}
+
+function work() {
+
+	local output_manifest="/tmp/Packages.out.$$"
+	local output_manifest_with_uri="/tmp/Packages.out.uri.$$"
+
+	validate_packages_source_dir
+	copy_packages_to_target
+	merge_manifests "${BASE_DIR}" "${output_manifest}" "${output_manifest_with_uri}"
+	publish_new_manifests "${BASE_DIR}" "${output_manifest}" "${output_manifest_with_uri}"
+
+}
+
+# Call main work function
+work
 
 status 'Success'
 
