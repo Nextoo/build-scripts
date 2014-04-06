@@ -17,6 +17,19 @@ function usage() {
 	cat <<-EOU
 		Usage:	$(basename "${0}") [long option(s)] [option(s)] <base manifest path> <delta manifest path> <output manifest path> <top packages uri>
 
+		<base manifest path>
+			Location of existing packages to to merge in with new packages. If this does not exist, the delta manifiest and packages will still be copied to the output.
+				*NOTE* Packages from this location are not copied to the output location. It is assumed for now that the output and base will be the same.
+			
+		<delta manifest path>
+			Location of the /usr/packages/ directory for the newly build packages and manifest file.
+			
+		<output manifest path>
+			Location to copy new packages and place merged manifest.
+		
+		<top packages uri>
+			Location to place the new manifest with the added URI to the head.
+		
 		Options:
 		    -a, --arch		Architecture to build (defaults to the output of 'uname -m')
 		    -b, --build		Configure environment for building binaries (not needed for user systems)
@@ -182,11 +195,6 @@ if [[ -z "${PACKAGES_URI}" ]]; then
 fi
 
 function validate_packages_source_dir() {
-	if [[ ! -f "${DELTA_DIR}/Packages" ]]; then
-		error 'A Packages manifest/index file, that Portage cares about, is not in the source directory provided. Assuming wrong delta manifest dir and exiting!'
-		exit 1
-	fi
-	
 	if [[ ! -f "${DELTA_DIR}/packages/Packages" ]]; then
 		error 'A Packages manifest/index file, that Portage does not care about, is not in the source directory provided. Assuming wrong delta manifest dir and exiting!'
 		exit 1
