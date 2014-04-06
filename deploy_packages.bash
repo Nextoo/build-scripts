@@ -257,7 +257,8 @@ function merge_manifests() {
 	local built_manifest="${DELTA_DIR}/Packages"
 
 	debug "Fetching remote manifest from '${remote_manifest}'..."
-	rsync "${remote_manifest}" "${base_manifest}"
+	#rsync "${remote_manifest}" "${base_manifest}"
+	wget "${remote_manifest}" -O "${base_manifest}"
 
 	if [[ $? != 0 ]]; then
 		error "Failed to fetch the remote manifest from '${remote_manifest}'"
