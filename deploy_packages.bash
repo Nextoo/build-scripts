@@ -299,11 +299,15 @@ function work() {
 
 	local output_manifest="/tmp/Packages.out.$$"
 	local output_manifest_with_uri="/tmp/Packages.out.uri.$$"
+	local output_staging_dir="output/"
+	
+	debug 'Creating output staging directory...'
+	mkdir -p "${output_staging_dir}/packages"
 
 	validate_packages_source_dir
-	copy_packages_to_target
+	#copy_packages_to_target
 	merge_manifests "${BASE_DIR}" "${output_manifest}" "${output_manifest_with_uri}"
-	publish_new_manifests "${BASE_DIR}" "${output_manifest}" "${output_manifest_with_uri}"
+	publish_new_manifests "${output_staging_dir}" "${output_manifest}" "${output_manifest_with_uri}"
 
 }
 
