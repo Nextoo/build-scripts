@@ -3,7 +3,8 @@
 # Defaults
 REPOS_CONF="${ROOT}/etc/portage/repos.conf"
 # This will get a directory 'portage' added to it under which the Nextoo repo will go
-NEXTOO_PATH="${ROOT}/usr/nextoo"
+NEXTOO_PATH="/usr/nextoo"
+NEXTOO_CHECKOUT_PATH="${ROOT}/${NEXTOO_PATH}"
 NEXTOO_PORTAGE_URI=https://github.com/Nextoo/portage-overlay.git
 
 # Get directory containing scripts
@@ -30,7 +31,7 @@ if [[ "${EUID}" -ne '0' ]]; then
 fi
 
 # Check if repo is configured already and bail early if so
-if [[ -d "${NEXTOO_PATH}"/portage/.git ]]; then
+if [[ -d "${NEXTOO_CHECKOUT_PATH}"/portage/.git ]]; then
 	status 'Nextoo overlay already available'
 	exit 0
 fi
@@ -73,10 +74,10 @@ fi
 status "Nextoo portage repository config in place, proceeding with installation..."
 
 # Create the Nextoo base directory if it doesn't exist
-[[ ! -d "${NEXTOO_PATH}" ]] && run mkdir -p "${NEXTOO_PATH}"
+[[ ! -d "${NEXTOO_CHECKOUT_PATH}" ]] && run mkdir -p "${NEXTOO_CHECKOUT_PATH}"
 
 # Clone the Nextoo portage repository the first time if needed
-if [[ ! -d "${NEXTOO_PATH}"/portage ]]; then
-	cd "${NEXTOO_PATH}"
+if [[ ! -d "${NEXTOO_CHECKOUT_PATH}"/portage/.git ]]; then
+	cd "${NEXTOO_CHECKOUT_PATH}"
 	run git clone "${NEXTOO_PORTAGE_URI}" portage
 fi
