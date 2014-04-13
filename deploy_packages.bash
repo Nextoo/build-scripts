@@ -212,7 +212,7 @@ function merge_manifest_files() {
 	# $2 - built manifest
 	# $3 - output manifest
 
-	./manifest_merge.rb "${1}" "${2}" "${3}"
+	"${SCRIPT_DIR}/manifest_merge.rb" "${1}" "${2}" "${3}"
 	
 	if [[ $? != 0 ]]; then
 		error 'Failed to merge the manifest files.'
@@ -257,7 +257,8 @@ function merge_manifests() {
 	local built_manifest="${DELTA_DIR}/Packages"
 
 	debug "Fetching remote manifest from '${remote_manifest}'..."
-	rsync "${remote_manifest}" "${base_manifest}"
+	#rsync "${remote_manifest}" "${base_manifest}"
+	wget "${remote_manifest}" -O "${base_manifest}"
 
 	if [[ $? != 0 ]]; then
 		error "Failed to fetch the remote manifest from '${remote_manifest}'"
