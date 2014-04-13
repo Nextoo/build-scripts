@@ -33,7 +33,10 @@ class Manifest
 		return content
 	end
 	
-	def merge_in(new_manifest_content)
+	def merge_in(new_manifest_content, take_new_header = true)
 		@packages.merge!(new_manifest_content.packages)
+
+		@header = new_manifest_content.header if take_new_header
 	end
+
 end

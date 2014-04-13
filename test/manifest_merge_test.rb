@@ -8,7 +8,7 @@ require 'minitest/pride'
 
 class TestManifestMerge < Minitest::Test
 	def setup
-		@test_header = <<-END.gsub(/^\t{3}/, '').strip
+		@test_new_header = <<-END.gsub(/^\t{3}/, '').strip
 			ACCEPT_KEYWORDS: amd64
 			ACCEPT_LICENSE: *
 			ACCEPT_PROPERTIES: *
@@ -35,6 +35,34 @@ class TestManifestMerge < Minitest::Test
 			VERSION: 0
 			REPO: gentoo
 			END
+
+		@test_old_header = <<-END.gsub(/^\t{3}/, '').strip
+			ACCEPT_KEYWORDS: amd64
+			ACCEPT_LICENSE: *
+			ACCEPT_PROPERTIES: *
+			ACCEPT_RESTRICT: *
+			CBUILD: x86_64-pc-linux-gnu
+			CHOST: x86_64-pc-linux-gnu
+			CONFIG_PROTECT: /etc /usr/share/gnupg/qualified.txt
+			CONFIG_PROTECT_MASK: /etc/ca-certificates.conf /etc/env.d /etc/fonts/fonts.conf /etc/gconf /etc/gentoo-release /etc/sandbox.d /etc/terminfo
+			FEATURES: assume-digests binpkg-logs buildpkg config-protect-if-modified distlocks ebuild-locks fixlafiles getbinpkg merge-sync news parallel-fetch preserve-libs protect-owned sandbox sfperms splitdebug strict unknown-features-warn unmerge-logs unmerge-orphans userfetch userpriv usersandbox usersync
+			GENTOO_MIRRORS: http://gentoo.closest.myvwan.com/gentoo
+			IUSE_IMPLICIT: prefix
+			PACKAGES: 1110
+			PROFILE: /var/lib/layman/nextoo/profiles/0.0.1/default/linux/amd64/desktop/kde
+			TIMESTAMP: 1389611111
+			USE: 1stclassmsg X a52 aac aacs abi_x86_64 acl acpi
+			USE_EXPAND: ABI_MIPS ABI_X86 ALSA_CARDS APACHE2_MODULES APACHE2_MPMS CALLIGRA_FEATURES CAMERAS COLLECTD_PLUGINS CROSSCOMPILE_OPTS CURL_SSL DRACUT_MODULES DVB_CARDS ELIBC ENLIGHTENMENT_MODULES FCDSL_CARDS FFTOOLS FOO2ZJS_DEVICES FRITZCAPI_CARDS GPSD_PROTOCOLS GRUB_PLATFORMS INPUT_DEVICES KERNEL LCD_DEVICES LIBREOFFICE_EXTENSIONS LINGUAS LIRC_DEVICES MONKEYD_PLUGINS NETBEANS_MODULES NGINX_MODULES_HTTP NGINX_MODULES_MAIL OFED_DRIVERS OFFICE_IMPLEMENTATION OPENMPI_FABRICS OPENMPI_OFED_FEATURES OPENMPI_RM PHP_TARGETS PYTHON_SINGLE_TARGET PYTHON_TARGETS QEMU_SOFTMMU_TARGETS QEMU_USER_TARGETS RUBY_TARGETS SANE_BACKENDS USERLAND VIDEO_CARDS VOICEMAIL_STORAGE XFCE_PLUGINS XTABLES_ADDONS
+			USE_EXPAND_HIDDEN: ABI_MIPS CROSSCOMPILE_OPTS ELIBC KERNEL USERLAND
+			USE_EXPAND_IMPLICIT: ARCH ELIBC KERNEL USERLAND
+			USE_EXPAND_UNPREFIXED: ARCH
+			USE_EXPAND_VALUES_ARCH: alpha amd64 amd64-fbsd amd64-linux arm arm-linux hppa hppa-hpux ia64 ia64-hpux ia64-linux m68k m68k-mint mips ppc ppc64 ppc64-linux ppc-aix ppc-macos ppc-openbsd s390 sh sparc sparc64-freebsd sparc64-solaris sparc-fbsd sparc-solaris x64-freebsd x64-macos x64-openbsd x64-solaris x86 x86-cygwin x86-fbsd x86-freebsd x86-interix x86-linux x86-macos x86-netbsd x86-openbsd x86-solaris x86-winnt
+			USE_EXPAND_VALUES_ELIBC: AIX Cygwin Darwin FreeBSD glibc HPUX Interix mintlib musl NetBSD OpenBSD SunOS uclibc Winnt
+			USE_EXPAND_VALUES_KERNEL: AIX Cygwin Darwin FreeBSD freemint HPUX Interix linux NetBSD OpenBSD SunOS Winnt
+			USE_EXPAND_VALUES_USERLAND: BSD GNU
+			VERSION: 0
+			REPO: gentoo
+		END
 			
 		@uri_header = <<-END.gsub(/^\t{3}/, '').strip
 			ACCEPT_KEYWORDS: amd64
@@ -146,12 +174,13 @@ class TestManifestMerge < Minitest::Test
 			SIZE: 6880
 			END
 			
-		@mini_manifest = @test_header + "\n\n" + @app_admin_eselect_blas_string + "\n\n" + @app_admin_eselect_fontconfig_string + "\n\n" + @app_admin_eselect_lib_bin_symlink_string
+		@mini_manifest = @test_old_header + "\n\n" + @app_admin_eselect_blas_string + "\n\n" + @app_admin_eselect_fontconfig_string + "\n\n" + @app_admin_eselect_lib_bin_symlink_string
 		@mini_manifest_count = 3
 		
-		@mini_manifest_b = @test_header + "\n\n" + @app_admin_eselect_mesa_string + "\n\n" + @app_admin_eselect_mpg123_string + "\n\n" + @app_admin_eselect_lib_bin_symlink_string
+		@mini_manifest_b = @test_new_header + "\n\n" + @app_admin_eselect_mesa_string + "\n\n" + @app_admin_eselect_mpg123_string + "\n\n" + @app_admin_eselect_lib_bin_symlink_string
 		
-		@mini_manifest_merged = @test_header + "\n\n" + @app_admin_eselect_blas_string + "\n\n" + @app_admin_eselect_fontconfig_string + "\n\n" + @app_admin_eselect_lib_bin_symlink_string + "\n\n" + @app_admin_eselect_mesa_string + "\n\n" + @app_admin_eselect_mpg123_string
+		@mini_manifest_merged = @test_new_header + "\n\n" + @app_admin_eselect_blas_string + "\n\n" + @app_admin_eselect_fontconfig_string + "\n\n" + @app_admin_eselect_lib_bin_symlink_string + "\n\n" + @app_admin_eselect_mesa_string + "\n\n" + @app_admin_eselect_mpg123_string
+		@mini_manifest_merged_with_old_header = @test_old_header + "\n\n" + @app_admin_eselect_blas_string + "\n\n" + @app_admin_eselect_fontconfig_string + "\n\n" + @app_admin_eselect_lib_bin_symlink_string + "\n\n" + @app_admin_eselect_mesa_string + "\n\n" + @app_admin_eselect_mpg123_string
 	end
 	
 	###########################################################################
@@ -183,8 +212,8 @@ class TestManifestMerge < Minitest::Test
 	###########################################################################
 	
 	def test_that_header_can_be_retrieved_as_string
-		header = Header.new(@test_header)
-		assert_equal @test_header, header.to_s
+		header = Header.new(@test_new_header)
+		assert_equal @test_new_header, header.to_s
 	end
 
 	def test_that_empty_header_returns_empty_string
@@ -222,9 +251,18 @@ class TestManifestMerge < Minitest::Test
 		
 		assert_equal @mini_manifest_merged, man_a.to_s
 	end
+
+	def test_that_the_old_manifest_header_can_be_kept
+		man_a = Manifest.new @mini_manifest
+		man_b = Manifest.new @mini_manifest_b
+
+		man_a.merge_in(man_b, false)
+
+		assert_equal @mini_manifest_merged_with_old_header, man_a.to_s
+	end
 	
 	def test_setting_header_uri
-		man = Manifest.new @test_header
+		man = Manifest.new @test_new_header
 		man.header.set_header_uri 'file:///build/nextoo/awesome.package'
 		
 		assert_equal @uri_header, man.to_s
