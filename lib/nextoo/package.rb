@@ -5,10 +5,10 @@ class Package
 		@literal = block
 		
 		#parse name out of literal
-		@name = /CPV.*$/.match(@literal)[0][5..-1]
+		@name = /CPV.*$/.match(@literal)[0][5..-1] unless block.empty?
 	end
 	
 	def to_s
-		return @literal
+		@literal
 	end
 end

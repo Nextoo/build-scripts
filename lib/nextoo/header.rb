@@ -2,15 +2,19 @@ class Header
 	
 	def initialize(header)
 		@properties = Hash.new
-		header.split("\n").each do |line|
-			unless line.strip == ""
-				k = line.split(':')
-				key = k.shift
-				value = k.join(':')
-				puts key + ' ' if value.nil?
-				@properties[key.downcase.to_sym] = value.strip
+
+		unless header.nil?
+			header.split("\n").each do |line|
+				unless line.strip == ""
+					k = line.split(':')
+					key = k.shift
+					value = k.join(':')
+					puts key + ' ' if value.nil?
+					@properties[key.downcase.to_sym] = value.strip
+				end
 			end
 		end
+
 	end
 	
 	def set_header_uri(uri)

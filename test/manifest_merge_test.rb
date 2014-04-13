@@ -172,6 +172,11 @@ class TestManifestMerge < Minitest::Test
 		package = Package.new(@app_admin_eselect_blas_string)
 		assert_raises(NoMethodError) { package.name = "New Name" }
 	end
+
+	def test_that_empty_package_returns_empty_string
+		package = Package.new ''
+		assert_empty package.to_s
+	end
 	
 	###########################################################################
 	# Header Tests
@@ -180,6 +185,11 @@ class TestManifestMerge < Minitest::Test
 	def test_that_header_can_be_retrieved_as_string
 		header = Header.new(@test_header)
 		assert_equal @test_header, header.to_s
+	end
+
+	def test_that_empty_header_returns_empty_string
+		header = Header.new ''
+		assert_empty header.to_s
 	end
 	
 	###########################################################################
@@ -219,4 +229,10 @@ class TestManifestMerge < Minitest::Test
 		
 		assert_equal @uri_header, man.to_s
 	end
+	
+	def test_handle_empty_manifest
+		empty_man = Manifest.new ''
+		assert_equal '', empty_man.to_s
+	end
+		
 end
