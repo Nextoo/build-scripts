@@ -21,7 +21,7 @@ def main
 	end
 	
 	# If there is not a current Manifest on the webserver, just copy the new Manifest over
-	unless published_manifest_content.nil?
+	unless published_manifest_content.nil? || published_manifest_content.empty?
 		published_manifest_content.merge_in(built_manifest_content)
 	else
 		published_manifest_content = built_manifest_content
