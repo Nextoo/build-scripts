@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Defaults
-REPOS_CONF="{$ROOT}/etc/portage/repos.conf"
+REPOS_CONF="${ROOT}/etc/portage/repos.conf"
 # This will get a directory 'portage' added to it under which the Nextoo repo will go
 NEXTOO_PATH="${ROOT}/usr/nextoo"
 NEXTOO_PORTAGE_URI=https://github.com/Nextoo/portage-overlay.git
