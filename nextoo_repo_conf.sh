@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Defaults
-REPOS_CONF=/etc/portage/repos.conf
+REPOS_CONF="{$ROOT}/etc/portage/repos.conf"
 # This will get a directory 'portage' added to it under which the Nextoo repo will go
-NEXTOO_PATH=/usr/nextoo
+NEXTOO_PATH="${ROOT}/usr/nextoo"
 NEXTOO_PORTAGE_URI=https://github.com/Nextoo/portage-overlay.git
 
 # Get directory containing scripts
@@ -29,9 +29,17 @@ if [[ "${EUID}" -ne '0' ]]; then
 	exit 1
 fi
 
+# Check if repo is configured already and bail early if so
+if [[ -d "${NEXTOO_PATH}"/portage/.git ]]; then
+	status 'Nextoo overlay already available'
+	exit 0
+fi
+
 # we need to have dev-vcs/git installed to clone and update the Nextoo repo
-status "Merging dev-vcs/git..."
-CURL_SSL="openssl" MAKEOPTS=-j10 USE="-* curl ipv6 ssl" emerge --noreplace --quiet dev-vcs/git
+if ! git --version > /dev/null; then
+	status "Merging dev-vcs/git..."
+	CURL_SSL="openssl" MAKEOPTS=-j10 USE="-* curl ipv6 ssl" emerge --noreplace --quiet dev-vcs/git
+fi
 
 # Store the Nextoo repo config info
 define NEXTOO_CONF <<EOL

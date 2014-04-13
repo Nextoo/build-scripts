@@ -229,6 +229,10 @@ for script in $SCRIPTS; do
 	run cp -a "${SCRIPT_DIR}/${script}" "${TARGET_DIR}/root/nextoo_scripts/"
 done
 
+status 'Deploying Nextoo overlay...'
+	export ROOT="${TARGET_DIR}"
+	run "${SCRIPT_DIR}/nextoo_repo_conf.sh"
+
 status 'Mounting filesystems...'
 run mount -t proc none proc/
 run mount --rbind /dev dev/
