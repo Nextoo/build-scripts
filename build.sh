@@ -27,7 +27,7 @@ function get_arch() {
 }
 
 function get_latest_stage_tarball_filename() {
-	data=$(wget -nv -O- "${MIRROR}/releases/${ARCH}/autobuilds/latest-stage3.txt" | grep -v "hardened" | grep -v "nomultilib" | grep "stage3-amd64-" )
+	data=$(wget -nv -O- "${MIRROR}/releases/${ARCH}/autobuilds/latest-stage3.txt" | grep -v "hardened" | grep -v "nomultilib" | egrep "^[0-9]{8}/stage3-${ARCH}-[0-9]{8}\.tar\.bz2$" )
 	if [[ "$?" -ne '0' ]]; then
 		error "Error determining latest stage3 tarball filename"
 		exit 1
