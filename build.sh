@@ -44,6 +44,7 @@ function usage() {
 		Options:
 		    -a, --arch		Architecture to build (defaults to the output of 'uname -m')
 		    -b, --build		Configure environment for building binaries (not needed for user systems)
+		    -c, --clean		Clean build (do not use existing binary packages during the build)
 		    -d, --debug		Enable debugging output
 		    -f, --force		Use the directory specified by -d even if it exists already
 		    -h, --help		Show this message and exit
@@ -92,6 +93,11 @@ while [[ ! -z "${1}" ]]; do
 
 		-b | --build)
 			NEXTOO_BUILD=true
+			shift
+			;;
+
+		-c | --clean)
+			NEXTOO_CLEAN=true
 			shift
 			;;
 
@@ -239,7 +245,7 @@ run mount --rbind /dev dev/
 run mount --rbind /sys sys/
 
 status 'Chrooting...'
-run env -i TERM="${TERM}" HOME=/root ARCH="${ARCH}" NEXTOO_BUILD="${NEXTOO_BUILD}" DEBUG="${DEBUG}" TARGET_PROFILE="${TARGET_PROFILE}" chroot "${TARGET_DIR}" /bin/bash --rcfile /root/nextoo_scripts/chroot_bootstrap.sh -i
+run env -i TERM="${TERM}" HOME=/root ARCH="${ARCH}" NEXTOO_BUILD="${NEXTOO_BUILD}" NEXTOO_CLEAN="${NEXTOO_CLEAN}" DEBUG="${DEBUG}" TARGET_PROFILE="${TARGET_PROFILE}" chroot "${TARGET_DIR}" /bin/bash --rcfile /root/nextoo_scripts/chroot_bootstrap.sh -i
 
 status "Changing working directory back to '${OLD_PWD}'..."
 run cd "${OLD_PWD}"
