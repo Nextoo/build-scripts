@@ -74,7 +74,7 @@ MIRROR="http://distfiles.gentoo.org"
 
 # Get command-line options
 set +e
-args=$(getopt --shell=bash --options="abdfhmt" --longoptions="arch:,build,debug,force,help,mirror:,timestamps" --name="$(basename "${0}")" -- "$@")
+args=$(getopt --shell=bash --options="abcdfhmt" --longoptions="arch:,build,clean,debug,force,help,mirror:,timestamps" --name="$(basename "${0}")" -- "$@")
 if [[ "$?" -ne '0' ]]; then
 	usage
 	exit 1 
