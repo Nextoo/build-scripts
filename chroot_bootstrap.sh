@@ -77,6 +77,15 @@ if [[ "${NEXTOO_BUILD}" == 'true' ]]; then
 	fi
 fi
 
+if [[ "${NEXTOO_CLEAN}" == "true" ]]; then
+	status "Disallowing binary package sources (clean build)..."
+	if ! egrep '^\s*FEATURES=' "${MAKE_CONF}" | grep "-getbinpkg" >/dev/null; then
+		status "Disabling portage 'getbinpkg' feature..."
+		echo 'FEATURES="${FEATURES} -getbinpkg"' >> "${MAKE_CONF}"
+	else
+		status "Skipping disabling of portage 'getbinpkg' feature (already disabled)"
+	fi
+fi
 
 status "Creating missing directories..."
 	status ".../run/lock"
@@ -100,6 +109,8 @@ fi
 
 status "Adding Nextoo overlay..."
 	run "${SCRIPT_DIR}/nextoo_repo_conf.sh"
+
+	
 
 # Temporary debug stuffs
 status "Printing emerge info..."
